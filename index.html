@@ -299,15 +299,66 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 
 /* mini player */
 .mini{position:fixed;left:max(18px,env(safe-area-inset-left,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:12px;padding:8px 16px 8px 8px;border-radius:99px;background:rgba(10,15,34,.85);border:1px solid var(--line-2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transform:translateY(140%);transition:transform .6s var(--ease);font-size:13px}
-.mini.show{transform:none}
+.mini.open{transform:none}
 .mini .disc{width:38px;height:38px;border-radius:50%;background:repeating-radial-gradient(circle,#0b0b10 0 2px,#1a1a24 2px 3px);position:relative;animation:spin 3.2s linear infinite}
 .mini .disc::after{content:"";position:absolute;inset:34%;border-radius:50%;background:var(--lamp)}
 .mini b{font-weight:500}
 .mini button{width:34px;height:34px;border-radius:50%;background:var(--moon);color:var(--ink);display:grid;place-items:center}
 .mini button svg{width:14px;height:14px}
 
+/* ── sky hint, progress, to-top, toast ── */
+.skyhint{margin-top:22px;font-size:13.5px;color:var(--moon-faint);letter-spacing:.02em}
+.hero{cursor:crosshair}
+.hero a,.hero button{cursor:pointer}
+.progress{position:fixed;left:0;top:0;height:2px;width:100%;z-index:55;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--tide),var(--lamp),var(--lamp-2));box-shadow:0 0 10px rgba(240,168,75,.6);pointer-events:none}
+.totop{position:fixed;right:max(18px,env(safe-area-inset-right,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:58;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;text-decoration:none;color:var(--moon);background:rgba(10,15,34,.8);border:1px solid var(--line-2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .4s,transform .4s var(--ease),border-color .2s}
+.totop.on{opacity:1;transform:none;pointer-events:auto}
+.totop:hover{border-color:var(--lamp)}
+.totop svg{width:18px;height:18px}
+.toast{position:fixed;left:50%;top:96px;z-index:70;transform:translate(-50%,-10px);padding:10px 18px;border-radius:99px;background:rgba(10,15,34,.85);border:1px solid var(--line-2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-size:14px;color:var(--moon);opacity:0;pointer-events:none;transition:opacity .4s,transform .4s var(--ease);white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ── CONSTELLATION ── */
+.skymap{position:relative;margin-top:48px;border-radius:28px;border:1px solid var(--line);background:radial-gradient(90% 100% at 50% 0%,rgba(123,147,230,.12),transparent 70%),rgba(4,6,15,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:18px;overflow:hidden}
+.skymap svg{display:block;width:100%;height:auto;overflow:visible}
+.cl-path{fill:none;stroke:rgba(236,230,214,.38);stroke-width:1.2;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 3.2s cubic-bezier(.45,0,.2,1)}
+.skymap.in .cl-path{stroke-dashoffset:0}
+.cl-month{fill:var(--moon-faint);font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.2em}
+.cl-grid{stroke:rgba(236,230,214,.07);stroke-dasharray:2 6}
+.cl-star{cursor:pointer;outline:none}
+.cl-star .glow{opacity:.55;animation:tw 3.4s ease-in-out infinite}
+.cl-star .core{fill:#fff;transition:r .3s,fill .3s}
+.cl-star .hit{fill:transparent}
+.cl-star:hover .core,.cl-star:focus .core,.cl-star.on .core{fill:var(--lamp-2)}
+.cl-star:hover .glow,.cl-star.on .glow{opacity:1}
+.cl-star .lbl{fill:var(--moon);font-family:'Gowun Batang',serif;font-size:17px;opacity:0;transition:opacity .3s}
+.cl-star.big .lbl,.cl-star:hover .lbl,.cl-star.on .lbl{opacity:1}
+.cl-star .dot-in{opacity:0;transition:opacity .6s}
+.skymap.in .cl-star .dot-in{opacity:1}
+@keyframes tw{50%{opacity:.25}}
+.cl-tip{position:absolute;z-index:3;left:0;top:0;transform:translate(-50%,calc(-100% - 22px));padding:12px 16px;border-radius:14px;background:rgba(10,15,34,.92);border:1px solid rgba(240,168,75,.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:none;opacity:0;transition:opacity .25s;white-space:nowrap;display:flex;flex-direction:column;gap:2px}
+.cl-tip.on{opacity:1}
+.cl-tip b{font-family:var(--f-head);font-size:18px;font-weight:400;color:#fff}
+.cl-tip span{font-size:13.5px;color:var(--moon-dim)}
+.cl-tip small{font-family:var(--f-mono);font-size:11.5px;color:var(--lamp);letter-spacing:.1em}
+
+/* ── FAQ ── */
+.faqwrap{display:grid;grid-template-columns:.8fr 1.2fr;gap:70px;align-items:start}
+.faq{display:grid;gap:10px}
+.faq details{border-radius:18px;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border-color .3s,background .3s}
+.faq details[open]{border-color:rgba(240,168,75,.4);background:rgba(240,168,75,.06)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;font-family:var(--f-head);font-size:clamp(17px,1.6vw,20px);color:var(--moon)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary i{position:relative;flex:0 0 auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--line-2);transition:transform .4s var(--ease),border-color .3s}
+.faq summary i::before,.faq summary i::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:1.5px;margin:-.75px 0 0 -5.5px;background:var(--moon);transition:transform .4s var(--ease)}
+.faq summary i::after{transform:rotate(90deg)}
+.faq details[open] summary i{transform:rotate(180deg);border-color:var(--lamp)}
+.faq details[open] summary i::after{transform:rotate(0)}
+.faq p{padding:0 24px 22px;color:var(--moon-dim);font-weight:300;font-size:15.5px;max-width:620px}
+
 /* ── responsive ── */
 @media (max-width:1000px){
+  .faqwrap{grid-template-columns:1fr;gap:30px}
   .nav nav{display:none}.nav .music{margin-left:auto}
   .principles,.works{grid-template-columns:1fr 1fr}
   .clockwrap,.ost{grid-template-columns:1fr;gap:56px}
@@ -341,6 +392,15 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   .secret .q{right:4%;top:32%}
   .numbers div{padding:30px 16px}
   .dial .ctime{font-size:44px}
+  .mini{padding:6px 12px 6px 6px;gap:10px;font-size:12.5px;max-width:calc(100% - 100px)}
+  .mini .disc{width:32px;height:32px}
+  .mini button{width:30px;height:30px}
+  .totop{width:44px;height:44px}
+  .skymap{padding:12px;border-radius:22px}
+  .cl-star .lbl{font-size:15px}
+  .faq summary{padding:17px 18px}
+  .faq p{padding:0 18px 18px}
+  .toast{top:78px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -389,6 +449,7 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
       <a class="btn solid" href="https://www.roblox.com/games/77539217208049" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>최신작 플레이</a>
       <button class="btn ghost" id="heroMusic" type="button"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="lbl">밤의 노래 듣기</span></button>
     </div>
+    <p class="skyhint fade f5">✦ 밤하늘을 누르면 별똥별이 떨어져요</p>
     <div class="herofoot fade f5">
       <div class="clockline"><i></i><span id="studioTime">녹턴의 시간</span></div>
       <div class="scroll">SCROLL<i></i></div>
@@ -435,6 +496,18 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
     <span class="eyebrow rv">Night Archive</span>
     <h2 class="h2 rv d1">그 밖의 <em>밤의 기록</em></h2>
     <div class="works" id="works"></div>
+  </div>
+</section>
+
+<!-- CONSTELLATION -->
+<section id="stars" style="padding-top:40px">
+  <div class="wrap">
+    <span class="eyebrow rv">Constellation</span>
+    <h2 class="h2 rv d1">녹턴 <em>별자리</em></h2>
+    <p class="lead rv d2">별 하나가 게임 하나예요. 석 달 동안 만든 게임을 만든 순서대로 이었어요. 별에 마우스를 올리거나 눌러 보세요.</p>
+    <div class="skymap rv" id="skymap">
+      <div class="cl-tip" id="clTip" role="status"><b id="clTipT"></b><span id="clTipG"></span><small id="clTipM"></small></div>
+    </div>
   </div>
 </section>
 
@@ -504,6 +577,25 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   </div>
 </section>
 
+<!-- FAQ -->
+<section id="faq" style="padding-top:40px">
+  <div class="wrap faqwrap">
+    <div>
+      <span class="eyebrow rv">Questions</span>
+      <h2 class="h2 rv d1">자주 묻는 <em>질문</em></h2>
+      <p class="lead rv d2">마지막 안뜰을 처음 해 보려는 사람들이 많이 궁금해하는 것들이에요.</p>
+    </div>
+    <div class="faq rv">
+      <details><summary>마지막 안뜰은 무료인가요?<i></i></summary><p>네, 무료로 플레이할 수 있어요. 무기 패스 같은 아이템을 로벅스로 살 수도 있지만, 게임 안에서 모은 증표로도 총을 하나씩 열 수 있어요.</p></details>
+      <details><summary>휴대폰에서도 할 수 있나요?<i></i></summary><p>네. 로블록스 앱만 있으면 휴대폰, 태블릿, PC 어디서나 할 수 있어요. 휴대폰에서는 화면 버튼으로 쏘고, 조준하고, 재장전해요.</p></details>
+      <details><summary>친구랑 같이 할 수 있나요?<i></i></summary><p>최대 10명까지 같은 서버에서 협동할 수 있어요. 친구와 함께하면 판이 끝날 때 받는 증표가 최대 45% 더 많아요.</p></details>
+      <details><summary>게임을 어떻게 찾아요?<i></i></summary><p>로블록스에서 ‘마지막 안뜰’을 검색하거나, 이 사이트의 플레이 버튼을 누르면 바로 게임 페이지로 가요.</p></details>
+      <details><summary>다른 게임들은 언제 나오나요?<i></i></summary><p>잔영, 링의 왕, 루멘리프 연대기는 지금 다듬고 있어요. 준비되면 개발 일지에 가장 먼저 알릴게요.</p></details>
+      <details><summary>버그를 찾았거나 의견이 있어요.<i></i></summary><p>마지막 안뜰 게임 페이지나 쇼츠 영상에 댓글로 남겨 주세요. 하나하나 읽고, 다음 업데이트에 고쳐서 돌려드려요.</p></details>
+    </div>
+  </div>
+</section>
+
 <!-- DAWN -->
 <section class="dawn" id="dawn">
   <div class="wrap">
@@ -529,11 +621,23 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   </div>
 </footer>
 
+<div class="progress" id="progress" aria-hidden="true"></div>
+<a class="totop" id="totop" href="#top" aria-label="맨 위로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5M5 12l7-7 7 7"/></svg></a>
+<div class="toast" id="toast" role="status"></div>
 <div class="mini" id="mini" aria-live="polite"><div class="disc"></div><div><b id="miniT">안뜰의 로비</b><br><span style="color:var(--moon-faint)">밤의 노래</span></div><button id="miniBtn" aria-label="일시정지"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button></div>
 
 <script id="frag" type="x-shader/x-fragment">
 precision highp float;
-uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro; uniform vec2 uMouse;
+uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro; uniform vec2 uMouse; uniform vec4 uS0, uS1, uS2;
+float shoot(vec2 p, vec4 s, float t){
+  float age = t - s.z; if (age < 0. || age > 1.5) return 0.;
+  vec2 d = vec2(cos(s.w), sin(s.w));
+  vec2 head = s.xy + d * age * .95, tail = head - d * min(age * .95, .38);
+  vec2 pa = p - tail, ba = head - tail; float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0., 1.);
+  float dist = length(pa - ba * h);
+  float env = smoothstep(0., .08, age) * (1. - smoothstep(.85, 1.5, age));
+  return (exp(-dist * dist * 90000.) * h * h * 1.6 + exp(-dist * 220.) * h * .14 + exp(-length(p - head) * 90.) * .5) * env;
+}
 float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3. - 2. * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y); }
@@ -569,6 +673,8 @@ void main(){
   float st = stars(p + par * .25, 85., .935, t) + stars(p + par * .4, 42., .972, t) * 1.7 + stars(p + par * .15, 170., .9, t) * .55;
   st *= (1. - dawn * .92) * smoothstep(-.28, .12, p.y) * (1. + uAudio * 1.6);
   col += vec3(.9, .93, 1.) * st;
+  // shooting stars
+  col += vec3(.92, .95, 1.) * (shoot(p, uS0, t) + shoot(p, uS1, t) + shoot(p, uS2, t)) * (1. - dawn * .8);
   // moon
   vec2 mc = mix(vec2(asp * .5 - .17, .3), vec2(asp * .5 - .34, .2), wide) + vec2(0., sc * .07 - dawn * .62) - par * .5;
   float mr = mix(.075, .1, wide);
@@ -698,6 +804,10 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
   const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = n => gl.getUniformLocation(pr, n);
   const uRes = U('uRes'), uTime = U('uTime'), uScroll = U('uScroll'), uAudio = U('uAudio'), uIntro = U('uIntro'), uMouse = U('uMouse');
+  const uS = [U('uS0'), U('uS1'), U('uS2')], shots = [[0, 0, -9, 0], [0, 0, -9, 0], [0, 0, -9, 0]]; let shotK = 0;
+  // shooting star: x, y in sky units (height = 1), heading down-left
+  window.nocturneShoot = (x, y, ang) => { shots[shotK] = [x, y, (performance.now() - t0) / 1000, ang ?? Math.PI * (1.08 + Math.random() * .14)]; shotK = (shotK + 1) % 3; };
+  if (!reduce) (function auto(){ setTimeout(() => { if (!document.hidden){ const asp = innerWidth / innerHeight; window.nocturneShoot((Math.random() - .3) * asp * .5, .18 + Math.random() * .3); } auto(); }, 6000 + Math.random() * 9000); })();
   let scale = mobile ? Math.min(devicePixelRatio || 1, 1.5) * .55 : Math.min(devicePixelRatio || 1, 1.5) * .8;
   function resize(){ cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height); }
   resize(); addEventListener('resize', resize);
@@ -715,6 +825,7 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
     gl.uniform1f(uAudio, audio.level);
     gl.uniform1f(uIntro, intro * intro * (3 - 2 * intro));
     gl.uniform2f(uMouse, mouse.x, mouse.y);
+    for (let k = 0; k < 3; k++) gl.uniform4f(uS[k], shots[k][0], shots[k][1], shots[k][2], shots[k][3]);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     requestAnimationFrame(frame);
   }
@@ -903,7 +1014,7 @@ function sync(){
   $$('.trk').forEach((b, j) => { const act = on && j === trackI; b.classList.toggle('on', act); b.querySelector('.pb').innerHTML = act ? PAUSE : PLAY; });
   $('#heroMusic .lbl').textContent = on ? '밤의 노래 끄기' : '밤의 노래 듣기';
   $('#navMusic').setAttribute('aria-label', on ? '밤의 노래 끄기' : '밤의 노래 켜기');
-  $('#mini').classList.toggle('show', on); $('#miniT').textContent = TRACKS[trackI].t;
+  $('#mini').classList.toggle('open', on); $('#miniT').textContent = TRACKS[trackI].t;
 }
 $('#tracks').addEventListener('click', e => { const b = e.target.closest('.trk'); if (!b) return; const i = +b.dataset.i; (i === trackI && !au.paused) ? pauseAll() : playTrack(i); });
 $('#heroMusic').addEventListener('click', toggle); $('#navMusic').addEventListener('click', toggle); $('#miniBtn').addEventListener('click', pauseAll);
@@ -941,6 +1052,119 @@ if ('IntersectionObserver' in window){
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12, rootMargin:'0px 0px -6% 0px'});
   $$('.rv').forEach(el => io.observe(el));
 } else $$('.rv').forEach(el => el.classList.add('in'));
+})();
+</script>
+
+<script>
+/* ───── extras: shooting-star wishes, scroll progress, to-top, constellation ───── */
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* wishes */
+const toast = $('#toast'); let wishes = 0, toastT = 0;
+function say(msg){ toast.textContent = msg; toast.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('on'), 2200); }
+$('.hero').addEventListener('click', e => {
+  if (e.target.closest('a,button') || !window.nocturneShoot) return;
+  const x = (e.clientX - innerWidth / 2) / innerHeight, y = (innerHeight / 2 - e.clientY) / innerHeight;
+  window.nocturneShoot(x + .16, y + .08);
+  wishes++;
+  say(wishes === 1 ? '✦ 별똥별이 떨어졌어요. 소원을 빌어 보세요' : `✦ 소원 ${wishes}개`);
+});
+
+/* progress + to-top */
+const bar = $('#progress'), top = $('#totop');
+function onScroll(){
+  const max = document.documentElement.scrollHeight - innerHeight;
+  bar.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+  top.classList.toggle('on', scrollY > innerHeight * .9);
+}
+addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+/* constellation */
+const STARS = [
+  ['EAT THE MAP','로블록스 게임','2026.09'],
+  ['네고는 사절','AI 흥정 대화 게임','2026.10'],
+  ['잔영','2D 픽셀 격투','2026.10'],
+  ['카트 러쉬','3D 카트 레이싱','2026.10'],
+  ['팝팝 페스티벌','파티 미니게임','2026.10'],
+  ['얼렁뚱땅 용사단','B급 전직 RPG','2026.10'],
+  ['루멘리프 연대기','2D RPG','2026.10'],
+  ['SWIPE SQUAD','3D 스와이프 액션','2026.10'],
+  ['PATCHLAND','픽셀 탐험','2026.11'],
+  ['감자 키우기','힐링 키우기','2026.11'],
+  ['포근포근 공방','힐링 공방 경영','2026.11'],
+  ['CART CHAOS','마트 난장판 3D','2026.11'],
+  ['말랑 대난투','3D 물리 난투','2026.11'],
+  ['DEEP DIVE','심해 탐사','2026.11'],
+  ['링의 왕','1인칭 3D 복싱','2026.11'],
+  ['잿빛 도시','멸망 후 50년 생존','2026.11'],
+  ['마지막 안뜰','로블록스 좀비 협동 슈팅 · 대표작','2026.11', 1],
+];
+const map = $('#skymap'), tip = $('#clTip');
+let layout = '';
+function rnd(i){ const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+function build(){
+  const narrow = map.clientWidth < 620, mode = narrow ? 'v' : 'h';
+  if (mode === layout) return; layout = mode;
+  const n = STARS.length, W = narrow ? 400 : 1000, H = narrow ? 980 : 520;
+  const pts = STARS.map((s, i) => {
+    const k = i / (n - 1);
+    const j = (rnd(i + 11) - .5) + (rnd(i + 37) - .5) * .6;
+    if (narrow) return [s[3] ? 300 : 200 + j * 230 + Math.sin(i * .55) * 40, 70 + k * (H - 150) + (rnd(i + 3) - .5) * 30];
+    return [70 + k * (W - 140) + (rnd(i + 3) - .5) * 26, s[3] ? 110 : 265 + j * 270 + Math.sin(i * .55) * 55];
+  });
+  const path = 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L');
+  const bg = Array.from({length:narrow ? 70 : 120}, (_, i) => `<circle cx="${(rnd(i + 50) * W).toFixed(1)}" cy="${(rnd(i + 900) * H).toFixed(1)}" r="${(rnd(i + 300) * 1.2 + .3).toFixed(2)}" fill="rgba(236,230,214,${(rnd(i + 700) * .5 + .1).toFixed(2)})"/>`).join('');
+  // month dividers: Sep | Oct between 0-1, Oct | Nov between 7-8
+  const mid = (a, b) => [(pts[a][0] + pts[b][0]) / 2, (pts[a][1] + pts[b][1]) / 2];
+  const d1 = mid(0, 1), d2 = mid(7, 8);
+  let grid = '', months = '';
+  if (narrow){
+    grid = [d1, d2].map(d => `<line class="cl-grid" x1="20" x2="${W - 20}" y1="${d[1]}" y2="${d[1]}"/>`).join('');
+    months = [['9월', pts[0][1] - 40], ['10월', d1[1] + 22], ['11월', d2[1] + 22]].map(([t, y]) => `<text class="cl-month" x="22" y="${y}">${t}</text>`).join('');
+  } else {
+    grid = [d1, d2].map(d => `<line class="cl-grid" y1="20" y2="${H - 20}" x1="${d[0]}" x2="${d[0]}"/>`).join('');
+    months = [['9월', pts[0][0]], ['10월', (d1[0] + d2[0]) / 2], ['11월', (d2[0] + W - 40) / 2]].map(([t, x]) => `<text class="cl-month" x="${x}" y="${H - 14}" text-anchor="middle">${t}</text>`).join('');
+  }
+  const stars = STARS.map((s, i) => {
+    const [x, y] = pts[i], big = !!s[3];
+    return `<g class="cl-star${big ? ' big' : ''}" data-i="${i}" tabindex="0" role="button" aria-label="${s[0]}, ${s[1]}, ${s[2]}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">
+      <g class="dot-in" style="transition-delay:${(i / n * 2.6).toFixed(2)}s">
+        <circle class="glow" r="${big ? 34 : 15}" fill="url(#${big ? 'clGlowBig' : 'clGlow'})" style="animation-delay:${(rnd(i + 5) * 3).toFixed(2)}s"/>
+        <circle class="core" r="${big ? 6.5 : 3.2}"/>
+      </g>
+      <circle class="hit" r="${narrow ? 26 : 20}"/>
+      <text class="lbl" y="${big ? -26 : -16}" text-anchor="middle">${s[0]}</text>
+    </g>`;
+  }).join('');
+  map.querySelector('svg')?.remove();
+  map.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="녹턴 게임즈가 만든 게임 ${n}개를 만든 순서대로 이은 별자리">
+    <defs>
+      <radialGradient id="clGlow"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".35" stop-color="#b9c8ff" stop-opacity=".25"/><stop offset="1" stop-color="#b9c8ff" stop-opacity="0"/></radialGradient>
+      <radialGradient id="clGlowBig"><stop offset="0" stop-color="#fff2d8" stop-opacity="1"/><stop offset=".3" stop-color="#f0a84b" stop-opacity=".45"/><stop offset="1" stop-color="#f0a84b" stop-opacity="0"/></radialGradient>
+    </defs>
+    ${bg}${grid}${months}<path class="cl-path" d="${path}" pathLength="1"/>${stars}</svg>`);
+}
+function showTip(g){
+  const s = STARS[+g.dataset.i], core = g.querySelector('.core').getBoundingClientRect(), m = map.getBoundingClientRect();
+  $('#clTipT').textContent = s[0]; $('#clTipG').textContent = s[1]; $('#clTipM').textContent = s[2];
+  let x = core.left + core.width / 2 - m.left; const y = core.top - m.top;
+  tip.classList.add('on');
+  const w = tip.offsetWidth; x = Math.max(w / 2 + 8, Math.min(m.width - w / 2 - 8, x));
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  if (y - tip.offsetHeight - 30 < 0) tip.style.transform = 'translate(-50%, 26px)'; else tip.style.transform = '';
+  map.querySelectorAll('.cl-star').forEach(el => el.classList.toggle('on', el === g));
+}
+function hideTip(){ tip.classList.remove('on'); map.querySelectorAll('.cl-star.on').forEach(el => el.classList.remove('on')); }
+map.addEventListener('pointerover', e => { const g = e.target.closest('.cl-star'); if (g && e.pointerType === 'mouse') showTip(g); });
+map.addEventListener('pointerout', e => { const g = e.target.closest('.cl-star'); if (g && e.pointerType === 'mouse' && !g.contains(e.relatedTarget)) hideTip(); });
+map.addEventListener('click', e => { const g = e.target.closest('.cl-star'); if (g) showTip(g); else hideTip(); });
+map.addEventListener('focusin', e => { const g = e.target.closest('.cl-star'); if (g) showTip(g); });
+map.addEventListener('focusout', hideTip);
+build(); new ResizeObserver(() => build()).observe(map);
+if (reduce) map.classList.add('in');
 })();
 </script>
 </body>
