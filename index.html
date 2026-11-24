@@ -306,6 +306,37 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 .mini button{width:34px;height:34px;border-radius:50%;background:var(--moon);color:var(--ink);display:grid;place-items:center}
 .mini button svg{width:14px;height:14px}
 
+/* ── CINEMATIC INTERLUDES ── */
+.cine-sp{position:relative;height:280vh;pointer-events:none}
+#cine{position:fixed;inset:0;z-index:45;pointer-events:none;background:#000;opacity:0;display:none;overflow:hidden}
+#warp{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cbar{position:absolute;left:0;right:0;height:0;background:#000;z-index:6}
+.cbar.t{top:0}.cbar.b{bottom:0}
+.cbar.b::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(240,168,75,.35),transparent)}
+.cbar.t::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(240,168,75,.35),transparent)}
+.cshot{position:absolute;inset:0;z-index:2;opacity:0;overflow:hidden;background:#000}
+.cshot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.15) contrast(1.1)}
+.cshot::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 50%,transparent 40%,rgba(0,0,0,.8)),linear-gradient(0deg,rgba(0,0,0,.75),transparent 45%)}
+.cshot .cap{position:absolute;z-index:2;left:7vw;bottom:calc(14vh + 26px);display:flex;flex-direction:column;gap:6px}
+.cshot .cap b{font-family:var(--f-head);font-weight:700;font-size:clamp(40px,7vw,110px);line-height:1;letter-spacing:-.03em;color:#fff;text-shadow:0 10px 40px rgba(0,0,0,.7)}
+.cshot .cap small{font-family:var(--f-mono);font-size:clamp(11px,1.1vw,14px);letter-spacing:.42em;color:var(--lamp)}
+.cshot .num{position:absolute;z-index:2;right:7vw;top:calc(14vh + 26px);font-family:var(--f-latin);font-style:italic;font-size:clamp(28px,3vw,44px);color:rgba(255,255,255,.75)}
+.ccard{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;opacity:0;will-change:opacity,transform,filter}
+.ccard small{font-family:var(--f-mono);font-size:clamp(11px,1.1vw,13px);letter-spacing:.5em;padding-left:.5em;color:var(--lamp);margin-bottom:26px}
+.ccard h2{font-family:var(--f-head);font-size:clamp(38px,6.8vw,108px);line-height:1.22;letter-spacing:-.02em;color:#fff;text-shadow:0 0 50px rgba(150,180,255,.35)}
+.ccard h2 em{font-family:var(--f-latin);font-style:italic;font-weight:400;color:var(--lamp);letter-spacing:0}
+.ccard.pres h2{font-family:var(--f-mono);font-size:clamp(13px,1.5vw,19px);letter-spacing:.7em;padding-left:.7em;color:rgba(255,255,255,.85);text-shadow:none}
+.ccard.pres p{font-family:var(--f-latin);font-style:italic;font-size:clamp(46px,7vw,110px);line-height:1;margin-top:18px;color:#fff}
+.ccard.warm h2{text-shadow:0 0 60px rgba(255,170,90,.55)}
+.cflash{position:absolute;inset:0;z-index:5;background:#fff;opacity:0}
+.cgrain{position:absolute;inset:-50%;z-index:7;opacity:.09;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .7s steps(5) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+.chud{position:absolute;z-index:7;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 3.2vh);display:flex;justify-content:space-between;padding:0 4vw;font-family:var(--f-mono);font-size:11px;letter-spacing:.3em;color:rgba(255,255,255,.45)}
+.chud .rec{display:inline-flex;align-items:center;gap:8px}
+.chud .rec::before{content:"";width:7px;height:7px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 8px #ff4a3d;animation:blink 1.2s infinite}
+.nav.cine{opacity:0;pointer-events:none}
+.nav{transition:background .4s,border-color .4s,transform .5s var(--ease),opacity .35s}
+
 /* ── responsive ── */
 @media (max-width:1000px){
   .nav nav{display:none}.nav .music{margin-left:auto}
@@ -342,7 +373,9 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   .numbers div{padding:30px 16px}
   .dial .ctime{font-size:44px}
 }
+@media (max-width:680px){.cine-sp{height:240vh}.cshot .cap{left:24px;right:24px}.cshot .num{right:24px}}
 @media (prefers-reduced-motion:reduce){
+  .cine-sp,#cine{display:none!important}
   *,*::before,*::after{animation:none!important;transition:none!important}
   html{scroll-behavior:auto}
   .js .rv,.js .hero .fade,.word .ch{opacity:1!important;transform:none!important;filter:none!important}
@@ -352,6 +385,17 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>
 <div class="lantern" id="lantern" aria-hidden="true"></div>
+
+<!-- cinematic overlay (driven by the .cine-sp spacers) -->
+<div id="cine" aria-hidden="true">
+  <canvas id="warp"></canvas>
+  <div class="cshot" id="cshot"><img id="cshotImg" alt=""><span class="num" id="cshotNum"></span><div class="cap"><small id="cshotEn"></small><b id="cshotT"></b></div></div>
+  <div id="ccards"></div>
+  <div class="cflash" id="cflash"></div>
+  <div class="cbar t" id="cbarT"></div><div class="cbar b" id="cbarB"></div>
+  <div class="chud"><span class="rec" id="chudL">NOCTURNE · REEL 01</span><span id="chudR">SCROLL ↓</span></div>
+  <div class="cgrain"></div>
+</div>
 
 <div id="intro" aria-hidden="true">
   <div class="box">
@@ -398,6 +442,8 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 
 <div class="marquee" aria-hidden="true"><div class="track" id="mq"></div></div>
 
+<div class="cine-sp" data-ch="0" aria-hidden="true"></div>
+
 <!-- MANIFESTO -->
 <section class="manifesto" id="studio">
   <div class="wrap">
@@ -410,6 +456,8 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
     </div>
   </div>
 </section>
+
+<div class="cine-sp" data-ch="1" aria-hidden="true"></div>
 
 <!-- SHOWCASE -->
 <section id="games" style="padding-top:60px">
@@ -503,6 +551,8 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
     </div>
   </div>
 </section>
+
+<div class="cine-sp" data-ch="2" aria-hidden="true"></div>
 
 <!-- DAWN -->
 <section class="dawn" id="dawn">
@@ -941,6 +991,138 @@ if ('IntersectionObserver' in window){
   const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold:.12, rootMargin:'0px 0px -6% 0px'});
   $$('.rv').forEach(el => io.observe(el));
 } else $$('.rv').forEach(el => el.classList.add('in'));
+})();
+</script>
+
+<script>
+/* ───── CINEMATIC INTERLUDES: scroll-driven warp, title cards and trailer cuts ───── */
+(() => {
+'use strict';
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+const $ = s => document.querySelector(s);
+const spacers = [...document.querySelectorAll('.cine-sp')];
+const cine = $('#cine'), cv = $('#warp'), ctx = cv.getContext('2d'), nav = $('#nav');
+const shot = $('#cshot'), shotImg = $('#cshotImg'), cardsEl = $('#ccards'), flash = $('#cflash');
+const barT = $('#cbarT'), barB = $('#cbarB');
+const mobile = matchMedia('(max-width: 680px)').matches || matchMedia('(pointer: coarse)').matches;
+const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const bell = (x, c, w) => { const k = (x - c) / w; return Math.exp(-k * k); };
+
+const CH = [
+  { reel:'REEL 01 · 밤', warm:0,
+    cards:[ {a:.13, b:.33, cls:'pres', html:'<h2>NOCTURNE GAMES</h2><p>presents</p>'},
+            {a:.35, b:.53, html:'<small>CHAPTER I</small><h2>모두가 잠든 시간,</h2>'},
+            {a:.55, b:.70, html:'<h2>한 줄씩 <em>만들고,</em></h2>'},
+            {a:.72, b:.89, html:'<h2>새벽에 <em>공개한다.</em></h2>'} ],
+    flashes:[.715], speed:t => .06 + 2.7 * bell(t, .5, .2) + 1.4 * bell(t, .72, .04) },
+  { reel:'REEL 02 · 게임', warm:0,
+    cards:[ {a:.13, b:.31, html:'<small>CHAPTER II</small><h2>밤사이 <em>완성된</em> 것들</h2>'},
+            {a:.83, b:.92, html:'<h2>지금, <em>플레이.</em></h2>'} ],
+    montage:{a:.34, b:.81, items:[
+      {img:'img/courtyard.jpg', t:'마지막 안뜰', e:'THE LAST COURTYARD'},
+      {img:'img/ember.jpg', t:'잔영', e:'EMBER DUEL'},
+      {img:'img/ring.jpg', t:'링의 왕', e:'KING OF THE RING'},
+      {img:'img/lumen.jpg', t:'루멘리프 연대기', e:'LUMENLEAF CHRONICLE'} ]},
+    flashes:[], speed:t => .08 + 3.6 * bell(t, .25, .1) + .5 * sm(.34, .4, t) * (1 - sm(.78, .82, t)) + 2.2 * bell(t, .83, .03) },
+  { reel:'REEL 03 · 여명', warm:1,
+    cards:[ {a:.14, b:.36, html:'<small>CHAPTER III</small><h2>여명</h2>'},
+            {a:.38, b:.58, html:'<h2>마지막 별이 <em>지고,</em></h2>'},
+            {a:.60, b:.86, cls:'warm', html:'<h2>첫 빛이 <em>들어온다.</em></h2>'} ],
+    flashes:[], speed:t => .04 + 3.0 * sm(.05, .22, t) * (1 - sm(.3, .78, t)) },
+];
+// cards into DOM
+CH.forEach((c, i) => c.cards.forEach(cd => { const el = document.createElement('div'); el.className = 'ccard' + (cd.cls ? ' ' + cd.cls : ''); el.innerHTML = cd.html; el.dataset.ch = i; cardsEl.appendChild(el); cd.el = el; }));
+// preload montage images
+CH.forEach(c => c.montage && c.montage.items.forEach(it => { const im = new Image(); im.src = it.img; }));
+
+/* warp star field */
+let stars = [], W = 0, H = 0, dpr = 1;
+function size(){ dpr = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.5); W = cv.width = Math.round(innerWidth * dpr); H = cv.height = Math.round(innerHeight * dpr); }
+function newStar(far){ return {x:(Math.random() * 2 - 1) * 1.4, y:(Math.random() * 2 - 1) * 1.4, z:far ? Math.random() * .98 + .02 : 1, h:Math.random()}; }
+size(); addEventListener('resize', size);
+for (let i = 0; i < (mobile ? 360 : 760); i++) stars.push(newStar(true));
+
+let active = -1, T = 0, speed = 0, targetSpeed = 0, running = false, last = 0, montageIdx = -1;
+
+function apply(i, t){
+  const c = CH[i]; active = i; T = t;
+  const black = sm(0, .11, t) * (1 - sm(.89, 1, t));
+  cine.style.display = black > .002 ? 'block' : 'none';
+  cine.style.opacity = black.toFixed(3);
+  nav.classList.toggle('cine', black > .5);
+  const bar = sm(.07, .17, t) * (1 - sm(.84, .94, t));
+  barT.style.height = barB.style.height = (bar * (mobile ? 9 : 12)).toFixed(2) + 'vh';
+  $('#chudL').textContent = 'NOCTURNE · ' + c.reel;
+  // cards
+  CH.forEach((cc, j) => cc.cards.forEach(cd => {
+    if (j !== i){ cd.el.style.opacity = 0; return; }
+    const inP = sm(cd.a, cd.a + .045, t), outP = sm(cd.b - .045, cd.b, t), o = inP * (1 - outP);
+    cd.el.style.opacity = o.toFixed(3);
+    cd.el.style.transform = `scale(${(1.08 - .08 * inP + .06 * outP).toFixed(4)})`;
+    cd.el.style.filter = `blur(${((1 - inP) * 12 + outP * 10).toFixed(1)}px)`;
+  }));
+  // montage (hard cuts with a black gap and a flash on every cut)
+  let fl = c.flashes.reduce((s, f) => s + bell(t, f, .008), 0);
+  if (c.montage){
+    const m = c.montage, n = m.items.length, seg = (t - m.a) / (m.b - m.a);
+    if (seg >= 0 && seg < 1){
+      const k = Math.min(n - 1, Math.floor(seg * n)), local = seg * n - k;
+      if (k !== montageIdx){ montageIdx = k; shotImg.src = m.items[k].img; $('#cshotT').textContent = m.items[k].t; $('#cshotEn').textContent = m.items[k].e; $('#cshotNum').textContent = String(k + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); }
+      const vis = sm(0, .06, local) * (1 - sm(.86, .92, local));
+      shot.style.opacity = vis.toFixed(3);
+      shotImg.style.transform = `scale(${(1.16 - .12 * local).toFixed(4)}) translateX(${((local - .5) * -2).toFixed(2)}%)`;
+      for (let q = 0; q <= n; q++) fl += .55 * bell(seg, q / n, .012);
+    } else { shot.style.opacity = 0; }
+  } else shot.style.opacity = 0;
+  flash.style.opacity = Math.min(.9, fl).toFixed(3);
+  targetSpeed = c.speed(t);
+  if (!running && black > .002){ running = true; last = performance.now(); requestAnimationFrame(loop); }
+}
+
+function update(){
+  let hit = false;
+  for (const sp of spacers){
+    const r = sp.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0){ apply(+sp.dataset.ch, (innerHeight - r.top) / (r.height + innerHeight)); hit = true; break; }
+  }
+  if (!hit && active !== -1){ active = -1; cine.style.display = 'none'; cine.style.opacity = 0; nav.classList.remove('cine'); }
+}
+addEventListener('scroll', update, {passive:true}); addEventListener('resize', update); update();
+
+function loop(now){
+  if (active === -1 || cine.style.display === 'none'){ running = false; return; }
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  speed += (targetSpeed - speed) * Math.min(1, dt * 5);
+  const warm = CH[active].warm * sm(.45, .9, T);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2, f = Math.min(W, H) * .55;
+  // core glow
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * .6);
+  const gi = Math.min(.5, speed * .12) + warm * .35;
+  g.addColorStop(0, warm > .1 ? `rgba(255,170,90,${gi})` : `rgba(120,150,255,${gi})`);
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // camera roll + shake
+  const shake = Math.max(0, speed - 2) * 1.6 * dpr;
+  ctx.translate(cx + (Math.random() - .5) * shake, cy + (Math.random() - .5) * shake);
+  ctx.rotate(Math.sin(now / 2600) * .035 + (active === 1 ? .05 : -.03));
+  ctx.lineCap = 'round';
+  const streak = .012 + speed * .05;
+  for (const s of stars){
+    s.z -= speed * dt * .42;
+    if (s.z <= .02){ Object.assign(s, newStar(false)); continue; }
+    const z0 = Math.min(1.2, s.z + streak);
+    const x1 = s.x / s.z * f, y1 = s.y / s.z * f, x0 = s.x / z0 * f, y0 = s.y / z0 * f;
+    if (Math.abs(x1) > W || Math.abs(y1) > H) continue;
+    const a = Math.min(1, (1 - s.z) * 1.4);
+    const hue = warm > .1 ? `255,${190 - s.h * 60 | 0},${120 - s.h * 70 | 0}` : (s.h < .2 ? '170,190,255' : s.h < .3 ? '255,215,170' : '235,240,255');
+    ctx.strokeStyle = `rgba(${hue},${a})`;
+    ctx.lineWidth = ((1 - s.z) * 2.4 + .4) * dpr;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  }
+  requestAnimationFrame(loop);
+}
 })();
 </script>
 </body>
