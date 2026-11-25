@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>길을 잃은 밤 · 녹턴 게임즈</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#04060f">
+<link rel="icon" href="/nocturne-games/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300&family=Gowun+Batang&family=IBM+Plex+Mono&family=Noto+Sans+KR:wght@300;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#04060f;--moon:#ece6d6;--dim:#aeaa9d;--lamp:#f0a84b;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(70% 55% at 72% 24%,#18204a 0%,transparent 70%),linear-gradient(#04060f 0%,#0a1028 70%,#151a38 100%);color:var(--moon);font-family:'Noto Sans KR',system-ui,sans-serif;display:grid;place-items:center;overflow:hidden;word-break:keep-all}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+.moon{position:fixed;right:12vw;top:12vh;width:min(22vw,150px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 38% 36%,#fffaf0,#d9d3c2 55%,#a59f8c);box-shadow:0 0 60px rgba(200,210,255,.35),0 0 160px rgba(140,160,255,.2)}
+.moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 62% 40%,rgba(90,84,70,.25) 0 12%,transparent 13%),radial-gradient(circle at 35% 66%,rgba(90,84,70,.2) 0 9%,transparent 10%)}
+.ridge{position:fixed;left:-5%;right:-5%;bottom:0;height:26vh;background:#05070f;clip-path:polygon(0 60%,8% 48%,17% 58%,28% 36%,38% 52%,50% 40%,61% 56%,72% 34%,83% 50%,92% 42%,100% 55%,100% 100%,0 100%)}
+main{position:relative;z-index:2;text-align:center;padding:24px;max-width:560px}
+.code{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(96px,22vw,180px);line-height:.9;color:transparent;-webkit-text-stroke:1px rgba(236,230,214,.55)}
+h1{font-family:'Gowun Batang',serif;font-weight:400;font-size:clamp(28px,5vw,40px);margin:16px 0 10px}
+p{color:var(--dim);font-weight:300;font-size:16px;line-height:1.7;margin:0 0 30px}
+a{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:500;font-size:15.5px;padding:15px 26px;border-radius:99px;background:var(--lamp);color:#140c02;transition:transform .3s,box-shadow .3s}
+a:hover{transform:translateY(-2px);box-shadow:0 14px 40px -10px rgba(240,168,75,.75)}
+small{display:block;margin-top:26px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.24em;color:#6f6e6a}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<div class="moon" aria-hidden="true"></div>
+<div class="ridge" aria-hidden="true"></div>
+<main>
+  <div class="code" aria-hidden="true">404</div>
+  <h1>길을 잃은 밤이에요</h1>
+  <p>찾는 페이지가 이 밤하늘에는 없어요. 달을 따라 녹턴 게임즈로 돌아가요.</p>
+  <a href="/nocturne-games/">☾ 녹턴으로 돌아가기</a>
+  <small>NOCTURNE GAMES</small>
+</main>
+<script>
+(() => {
+  const c = document.getElementById('c'), x = c.getContext('2d'); let W, H, s = [];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){ const d = Math.min(devicePixelRatio || 1, 2); W = c.width = innerWidth * d; H = c.height = innerHeight * d;
+    s = Array.from({length: Math.round(innerWidth * innerHeight / 2600)}, () => ({x: Math.random() * W, y: Math.random() * H * .8, r: (Math.random() * 1.2 + .3) * d, p: Math.random() * 6.28, v: .5 + Math.random() * 2})); }
+  size(); addEventListener('resize', size);
+  (function f(t){ x.clearRect(0, 0, W, H);
+    for (const a of s){ const k = reduce ? .7 : .45 + .55 * Math.abs(Math.sin(t / 1000 * a.v + a.p)); x.fillStyle = `rgba(236,240,255,${k})`; x.beginPath(); x.arc(a.x, a.y, a.r, 0, 6.283); x.fill(); }
+    if (!reduce) requestAnimationFrame(f); })(0);
+})();
+</script>
+</body>
+</html>

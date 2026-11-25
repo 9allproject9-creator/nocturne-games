@@ -12,6 +12,16 @@
 <meta property="og:image" content="https://9allproject9-creator.github.io/nocturne-games/og.jpg">
 <meta property="og:url" content="https://9allproject9-creator.github.io/nocturne-games/">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://9allproject9-creator.github.io/nocturne-games/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="녹턴">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://9allproject9-creator.github.io/nocturne-games/#studio","name":"Nocturne Games","alternateName":"녹턴 게임즈","url":"https://9allproject9-creator.github.io/nocturne-games/","logo":"https://9allproject9-creator.github.io/nocturne-games/icon-512.png","slogan":"밤에 만들고, 새벽에 공개합니다."},
+ {"@type":"VideoGame","name":"마지막 안뜰","alternateName":"The Last Courtyard","url":"https://www.roblox.com/games/77539217208049","gamePlatform":"Roblox","genre":["좀비","협동 슈팅"],"numberOfPlayers":{"@type":"QuantitativeValue","minValue":1,"maxValue":10},"author":{"@id":"https://9allproject9-creator.github.io/nocturne-games/#studio"},"image":"https://9allproject9-creator.github.io/nocturne-games/img/courtyard-title.jpg"}
+]}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2304060f'/%3E%3Cmask id='m'%3E%3Crect width='32' height='32' fill='%23fff'/%3E%3Ccircle cx='21' cy='12' r='10' fill='%23000'/%3E%3C/mask%3E%3Ccircle cx='15' cy='17' r='10' fill='%23ece6d6' mask='url(%23m)'/%3E%3Ccircle cx='24' cy='8' r='1.8' fill='%23f0a84b'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -296,6 +306,9 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 .frow{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px 30px;margin-top:40px;font-size:13.5px;color:rgba(255,236,214,.6)}
 .frow a{text-decoration:none;border-bottom:1px solid rgba(255,236,214,.3)}
 .frow a:hover{color:#fff}
+.flinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px}
+.flinks a,.flinks button{font-size:14px;text-decoration:none;color:#fbeee0;padding:10px 16px;border-radius:99px;border:1px solid rgba(255,236,214,.22);background:rgba(255,236,214,.04);transition:border-color .2s,background .2s}
+.flinks a:hover,.flinks button:hover{border-color:var(--lamp);background:rgba(240,168,75,.1)}
 
 /* mini player */
 .mini{position:fixed;left:max(18px,env(safe-area-inset-left,0px));bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:12px;padding:8px 16px 8px 8px;border-radius:99px;background:rgba(10,15,34,.85);border:1px solid var(--line-2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transform:translateY(140%);transition:transform .6s var(--ease);font-size:13px}
@@ -305,6 +318,31 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 .mini b{font-weight:500}
 .mini button{width:34px;height:34px;border-radius:50%;background:var(--moon);color:var(--ink);display:grid;place-items:center}
 .mini button svg{width:14px;height:14px}
+
+/* ── moon line, skip link ── */
+.hfl{display:flex;flex-direction:column;gap:9px}
+.moonline{display:flex;align-items:center;gap:10px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.1em;color:var(--moon-dim)}
+.moonline svg{width:17px;height:17px;flex:0 0 auto;filter:drop-shadow(0 0 6px rgba(236,230,214,.35))}
+.skip{position:fixed;left:16px;top:-60px;z-index:200;padding:10px 16px;border-radius:10px;background:var(--lamp);color:#140c02;font-weight:500;text-decoration:none;transition:top .2s}
+.skip:focus{top:16px}
+
+/* ── showcase video + shorts modal ── */
+.slide .pic .vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s}
+.slide .pic .vid.playing{opacity:1}
+.slide .info .acts{display:flex;flex-wrap:wrap;gap:10px}
+.vtag{position:absolute;z-index:3;right:clamp(26px,5vw,72px);top:78px;display:none;align-items:center;gap:8px;font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.7)}
+.vtag::before{content:"";width:7px;height:7px;border-radius:50%;background:#ff5a4a;box-shadow:0 0 8px #ff5a4a;animation:blink 1.4s infinite}
+.slide.on .vtag.live{display:flex}
+.vmodal{position:fixed;inset:0;z-index:95;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;background:rgba(2,3,8,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;transition:opacity .35s}
+.vmodal[hidden]{display:none}
+.vmodal.on{opacity:1}
+.vbox{position:relative;height:min(82svh,780px);aspect-ratio:9/16;max-width:100%;border-radius:26px;overflow:hidden;background:#000;border:1px solid var(--line-2);box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 80px -20px rgba(240,168,75,.35);transform:scale(.96);transition:transform .45s var(--ease)}
+.vmodal.on .vbox{transform:none}
+.vbox video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.vclose{position:absolute;top:12px;right:12px;z-index:2;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:22px;line-height:1;display:grid;place-items:center}
+.vclose:hover{background:rgba(0,0,0,.8)}
+.vnote{font-size:13px;color:var(--moon-faint)}
+.arrows .pz svg{width:16px;height:16px}
 
 /* ── sky hint, progress, to-top, toast ── */
 .skyhint{margin-top:22px;font-size:13.5px;color:var(--moon-faint);letter-spacing:.02em}
@@ -367,8 +405,18 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   .numbers div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .post{grid-template-columns:1fr;gap:6px}
 }
+/* phones & touch: blurring glass over an animated sky is expensive, so use solid glass instead */
+@media (max-width:680px), (pointer:coarse){
+  :root{--glass:rgba(10,15,34,.9)}
+  .nav.solid,.marquee,.pr,.step.on,.trk,.faq details,.skymap,.btn.ghost,.status,.arrows button,.mini,.totop,.toast,.cl-tip,.vmodal{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .nav.solid{background:rgba(4,6,15,.94)}
+  .marquee{background:rgba(4,6,15,.88)}
+  .btn.ghost,.arrows button{background:rgba(4,6,15,.72)}
+  .vmodal{background:rgba(2,3,8,.95)}
+}
 @media (max-width:680px){
   section{padding-block:100px}
+  .vtag{top:66px;right:22px}
   .nav .wrap{height:64px}
   .brand span{font-size:18px;letter-spacing:.24em}
   .nav .music{padding:7px 12px 7px 10px;font-size:13px}
@@ -410,6 +458,7 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 </style>
 </head>
 <body>
+<a class="skip" href="#studio">본문으로 건너뛰기</a>
 <canvas id="sky" aria-hidden="true"></canvas>
 <div class="lantern" id="lantern" aria-hidden="true"></div>
 
@@ -451,7 +500,10 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
     </div>
     <p class="skyhint fade f5">✦ 밤하늘을 누르면 별똥별이 떨어져요</p>
     <div class="herofoot fade f5">
-      <div class="clockline"><i></i><span id="studioTime">녹턴의 시간</span></div>
+      <div class="hfl">
+        <div class="clockline"><i></i><span id="studioTime">녹턴의 시간</span></div>
+        <div class="moonline"><svg id="moonIcon" viewBox="0 0 20 20" aria-hidden="true"></svg><span id="moonInfo">오늘 밤의 달</span></div>
+      </div>
       <div class="scroll">SCROLL<i></i></div>
     </div>
   </div>
@@ -484,7 +536,7 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
       <!-- slides injected -->
       <div class="shownav">
         <div class="thumbs" id="thumbs"></div>
-        <div class="arrows"><button id="prevBtn" aria-label="이전 게임"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></button><button id="nextBtn" aria-label="다음 게임"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg></button></div>
+        <div class="arrows"><button id="pauseBtn" class="pz" type="button" aria-label="자동 넘기기 멈추기"></button><button id="prevBtn" aria-label="이전 게임"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5l-7 7 7 7"/></svg></button><button id="nextBtn" aria-label="다음 게임"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5l7 7-7 7"/></svg></button></div>
       </div>
     </div>
   </div>
@@ -569,6 +621,7 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
       <div><b data-n="3">0</b><span>스튜디오 나이 (개월)</span></div>
     </div>
     <div class="log">
+      <article class="post rv"><time>2026.11.24</time><div><h3>녹턴 게임즈 홈페이지 오픈</h3><p>실시간으로 그려지는 밤하늘, 게임 쇼케이스, 밤의 노래까지. 하늘을 누르면 별똥별도 떨어져요.</p></div><span class="cat">NEWS</span></article>
       <article class="post rv"><time>2026.11.23</time><div><h3>마지막 안뜰 공식 사이트 오픈</h3><p>스크롤을 내리면 밤이 새벽으로 바뀌는 사이트를 열었어요. OST와 트레일러도 들어 있어요.</p></div><span class="cat">NEWS</span></article>
       <article class="post rv"><time>2026.11.21</time><div><h3>포탑 4종 새로 제작, 스킨 상자 오픈</h3><p>포탑이 부드럽게 조준하고, 반동과 탄피까지 보여요. 보급·작전·전설 상자와 새 상점도 열렸어요.</p></div><span class="cat c2">UPDATE</span></article>
       <article class="post rv"><time>2026.11.19</time><div><h3>무기 게임패스와 배지 5종 추가</h3><p>SM-9부터 RPG-9까지 무기 6종을 영구로 쓸 수 있는 패스, 그리고 ‘도살자 사냥꾼’ 같은 배지를 추가했어요.</p></div><span class="cat c2">UPDATE</span></article>
@@ -604,6 +657,7 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
     <p class="rv d2">여기까지 내려오는 동안 하늘이 밝아졌어요. 녹턴의 첫 번째 게임이 기다리고 있어요. 플레이해 보고 댓글을 남겨 주면 다음 업데이트에 반영할게요.</p>
     <div class="btns rv d3">
       <a class="btn solid" href="https://www.roblox.com/games/77539217208049" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>마지막 안뜰 플레이</a>
+      <button class="btn ghost" type="button" data-share><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>친구에게 알려 주기</button>
       <a class="btn ghost" href="#top">↑ 다시 밤으로</a>
     </div>
   </div>
@@ -613,9 +667,15 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 <footer>
   <div class="wrap">
     <div class="fword" aria-hidden="true">Nocturne</div>
+    <nav class="flinks" aria-label="바로가기">
+      <a href="https://www.roblox.com/games/77539217208049" target="_blank" rel="noopener">마지막 안뜰 플레이 ↗</a>
+      <button type="button" data-shorts>공식 쇼츠 보기</button>
+      <a href="#ost">밤의 노래</a>
+      <a href="#faq">자주 묻는 질문</a>
+      <button type="button" data-share>친구에게 알려 주기</button>
+    </nav>
     <div class="frow">
       <span>© 2026 Nocturne Games · 1인 인디 게임 스튜디오</span>
-      <span><a href="https://www.roblox.com/games/77539217208049" target="_blank" rel="noopener">마지막 안뜰 (Roblox)</a></span>
       <span>Roblox는 Roblox Corporation의 상표이며, 이 사이트는 Roblox와 관련이 없습니다.</span>
     </div>
   </div>
@@ -624,11 +684,18 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 <div class="progress" id="progress" aria-hidden="true"></div>
 <a class="totop" id="totop" href="#top" aria-label="맨 위로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5M5 12l7-7 7 7"/></svg></a>
 <div class="toast" id="toast" role="status"></div>
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-label="마지막 안뜰 공식 쇼츠" hidden>
+  <div class="vbox">
+    <button class="vclose" id="vclose" type="button" aria-label="쇼츠 닫기">×</button>
+    <video id="vplayer" controls playsinline preload="none" poster="video/shorts.jpg"><source src="video/shorts.mp4" type="video/mp4"></video>
+  </div>
+  <p class="vnote">마지막 안뜰 공식 쇼츠 · 소리가 나와요 · 바깥을 누르거나 Esc로 닫기</p>
+</div>
 <div class="mini" id="mini" aria-live="polite"><div class="disc"></div><div><b id="miniT">안뜰의 로비</b><br><span style="color:var(--moon-faint)">밤의 노래</span></div><button id="miniBtn" aria-label="일시정지"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button></div>
 
 <script id="frag" type="x-shader/x-fragment">
 precision highp float;
-uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro; uniform vec2 uMouse; uniform vec4 uS0, uS1, uS2;
+uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro, uPhase; uniform vec2 uMouse; uniform vec4 uS0, uS1, uS2;
 float shoot(vec2 p, vec4 s, float t){
   float age = t - s.z; if (age < 0. || age > 1.5) return 0.;
   vec2 d = vec2(cos(s.w), sin(s.w));
@@ -680,7 +747,9 @@ void main(){
   float mr = mix(.075, .1, wide);
   float dm = length(p - mc);
   float ge = max(dm - mr, 0.);
-  col += vec3(.55, .62, .86) * (exp(-ge * 6.5) * .2 + exp(-ge * 28.) * .38) * (1. - dawn * .75) * (1. + uAudio * .5);
+  // real moon phase: uPhase 0 = new moon, .5 = full moon (waxing lit from the right)
+  float mph = uPhase * 6.28318, illum = .5 - .5 * cos(mph);
+  col += vec3(.55, .62, .86) * (exp(-ge * 6.5) * .2 + exp(-ge * 28.) * .38) * (1. - dawn * .75) * (1. + uAudio * .5) * (.12 + .88 * illum);
   vec2 q = (p - mc) / mr; float r = length(q);
   if (r < 1.05){
     vec3 n = vec3(q, sqrt(max(0., 1. - r * r)));
@@ -696,6 +765,9 @@ void main(){
     m *= 1. - smoothstep(.47, .66, maria) * .3;
     m += cr * .3;
     m *= .5 + .5 * pow(n.z, .55);
+    vec3 Lm = vec3(sin(mph), 0., -cos(mph));
+    float lit = smoothstep(-.12, .08, dot(n, Lm));
+    m = m * lit + m * vec3(.5, .62, .95) * .075 * (1. - lit);
     m = mix(m, m * vec3(1., .78, .58), dawn);
     float aa = 2.5 / (uRes.y * mr);
     col = mix(col, m, smoothstep(1., 1. - aa, r) * (1. - dawn * .35));
@@ -803,7 +875,9 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = n => gl.getUniformLocation(pr, n);
-  const uRes = U('uRes'), uTime = U('uTime'), uScroll = U('uScroll'), uAudio = U('uAudio'), uIntro = U('uIntro'), uMouse = U('uMouse');
+  const uRes = U('uRes'), uTime = U('uTime'), uScroll = U('uScroll'), uAudio = U('uAudio'), uIntro = U('uIntro'), uMouse = U('uMouse'), uPhase = U('uPhase');
+  let phaseNow = moonPhase(new Date()).frac; setInterval(() => { phaseNow = moonPhase(new Date()).frac; }, 60000);
+  const lowFps = mobile;   // phones: draw the sky at ~30fps to save battery
   const uS = [U('uS0'), U('uS1'), U('uS2')], shots = [[0, 0, -9, 0], [0, 0, -9, 0], [0, 0, -9, 0]]; let shotK = 0;
   // shooting star: x, y in sky units (height = 1), heading down-left
   window.nocturneShoot = (x, y, ang) => { shots[shotK] = [x, y, (performance.now() - t0) / 1000, ang ?? Math.PI * (1.08 + Math.random() * .14)]; shotK = (shotK + 1) % 3; };
@@ -813,6 +887,7 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
   resize(); addEventListener('resize', resize);
   let t0 = performance.now(), last = t0, intro = 0, frames = 0, acc = 0, sScroll = 0;
   function frame(now){
+    if (lowFps && now - last < 30){ requestAnimationFrame(frame); return; }
     const dt = Math.min(.1, (now - last) / 1000); last = now;
     // adaptive quality
     if (frames < 90){ frames++; if (frames > 20) acc += dt; if (frames === 90 && acc / 70 > 1 / 40 && scale > .35){ scale *= .72; resize(); } }
@@ -825,6 +900,7 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
     gl.uniform1f(uAudio, audio.level);
     gl.uniform1f(uIntro, intro * intro * (3 - 2 * intro));
     gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.uniform1f(uPhase, phaseNow);
     for (let k = 0; k < 3; k++) gl.uniform4f(uS[k], shots[k][0], shots[k][1], shots[k][2], shots[k][3]);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     requestAnimationFrame(frame);
@@ -854,6 +930,27 @@ addEventListener('scroll', onScroll, {passive:true});
 /* active nav link */
 const navIO = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) $$('.nav nav a').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), {rootMargin:'-45% 0px -50% 0px'});
 ['studio','games','night','ost','devlog'].forEach(id => navIO.observe(document.getElementById(id)));
+
+/* tonight's real moon (synodic month from a known new moon, 2000-01-06 18:14 UTC) */
+function moonPhase(d){
+  const SYN = 29.530588853, REF = Date.UTC(2000, 0, 6, 18, 14);
+  const age = (((d - REF) / 864e5) % SYN + SYN) % SYN, frac = age / SYN;
+  const illum = (1 - Math.cos(frac * 2 * Math.PI)) / 2;
+  const name = age < 1 ? '삭 · 달이 쉬는 밤' : age < 6.4 ? '초승달' : age < 8.4 ? '상현달' : age < 13.8 ? '차오르는 달' : age < 15.8 ? '보름달' : age < 21.1 ? '기우는 달' : age < 23.1 ? '하현달' : age < 28.5 ? '그믐달' : '삭 · 달이 쉬는 밤';
+  return {age, frac, illum, name};
+}
+function moonIcon(frac){
+  // lit part as an SVG path (waxing = right side lit), r = 8 around (10,10)
+  const r = 8, c = Math.cos(frac * 2 * Math.PI), rx = Math.abs(c) * r, waxing = frac < .5;
+  const outer = waxing ? `M10 2 A${r} ${r} 0 0 1 10 18` : `M10 2 A${r} ${r} 0 0 0 10 18`;
+  const sweep = waxing ? (c > 0 ? 0 : 1) : (c > 0 ? 1 : 0);
+  return `<circle cx="10" cy="10" r="${r}" fill="rgba(236,230,214,.14)" stroke="rgba(236,230,214,.35)" stroke-width=".6"/><path d="${outer} A${rx.toFixed(2)} ${r} 0 0 ${sweep} 10 2 Z" fill="#ece6d6"/>`;
+}
+(function moonLine(){
+  const m = moonPhase(new Date());
+  $('#moonIcon').innerHTML = moonIcon(m.frac);
+  $('#moonInfo').textContent = `오늘 밤의 달 · ${m.name} · 밝기 ${Math.round(m.illum * 100)}%`;
+})();
 
 /* studio clock */
 function clock(){
@@ -886,7 +983,7 @@ onScroll();
 
 /* ───── showcase ───── */
 const GAMES = [
-  {t:'마지막 안뜰', en:'The Last Courtyard', st:'live', stl:'서비스 중', img:'img/courtyard.jpg', pos:'center 55%', d:'사흘째 밤, 벽으로 둘러싸인 안뜰. 몰려오는 좀비 웨이브를 막고 새벽까지 버티는 협동 슈팅이에요. 포탑을 깔고, 스킨 상자를 열고, 매주 바뀌는 도전에 맞서 보세요.', specs:[['플랫폼','Roblox'],['인원','1–10명 협동'],['출시','2026.11']], link:'https://www.roblox.com/games/77539217208049'},
+  {t:'마지막 안뜰', en:'The Last Courtyard', st:'live', stl:'서비스 중', img:'img/courtyard.jpg', pos:'center 55%', d:'사흘째 밤, 벽으로 둘러싸인 안뜰. 몰려오는 좀비 웨이브를 막고 새벽까지 버티는 협동 슈팅이에요. 포탑을 깔고, 스킨 상자를 열고, 매주 바뀌는 도전에 맞서 보세요.', specs:[['플랫폼','Roblox'],['인원','1–10명 협동'],['출시','2026.11']], link:'https://www.roblox.com/games/77539217208049', video:'video/courtyard-loop.mp4', shorts:true},
   {t:'잔영', en:'Ember Duel', st:'dev', stl:'다듬는 중', img:'img/ember.jpg', pos:'center 35%', d:'불씨처럼 남는 잔상을 쓰는 2D 픽셀 격투. 노을 진 무대에서 친구와 온라인으로 1:1 대전을 벌여요.', specs:[['플랫폼','Web'],['모드','1:1 온라인 대전'],['장르','픽셀 격투']]},
   {t:'링의 왕', en:'King of the Ring', st:'dev', stl:'다듬는 중', img:'img/ring.jpg', pos:'center 40%', d:'읽고, 피하고, 때려라. 설치 없이 브라우저에서 하는 1인칭 3D 복싱이에요. 그림과 소리 모두 코드로 직접 만들었어요.', specs:[['플랫폼','Web'],['시점','1인칭 3D'],['장르','복싱']]},
   {t:'루멘리프 연대기', en:'Lumenleaf Chronicle', st:'dev', stl:'다듬는 중', img:'img/lumen.jpg', pos:'center', d:'빛나는 거대한 나무 아래 펼쳐진 세계를 모험하는 2D RPG. NPC와 이야기하고, 보스를 쓰러뜨리고, 엔딩까지 걸어가요.', specs:[['플랫폼','Web'],['장르','2D RPG'],['특징','보스전 · 엔딩']]},
@@ -896,27 +993,40 @@ const show = $('#show'), thumbsEl = $('#thumbs');
 const navEl = show.querySelector('.shownav');
 GAMES.forEach((g, i) => {
   const s = document.createElement('article'); s.className = 'slide' + (g.secret ? ' secret' : ''); s.setAttribute('aria-roledescription', 'slide'); s.setAttribute('aria-label', `${i + 1} / ${GAMES.length}: ${g.t}`);
-  s.innerHTML = `<div class="pic" ${g.img ? `style="background-image:url(${g.img});background-position:${g.pos}"` : ''}></div>${g.secret ? '<canvas></canvas><div class="q" aria-hidden="true">?</div>' : ''}
+  s.innerHTML = `<div class="pic" ${g.img ? `style="background-image:url(${g.img});background-position:${g.pos}"` : ''}>${g.video ? `<video class="vid" muted loop playsinline preload="none" aria-hidden="true"><source src="${g.video}" type="video/mp4"></video>` : ''}</div>${g.video ? '<span class="vtag">GAMEPLAY</span>' : ''}${g.secret ? '<canvas></canvas><div class="q" aria-hidden="true">?</div>' : ''}
     <div class="info"><span class="status st-${g.st}">${g.stl}</span>
     <h3>${g.secret ? `${g.t} <span class="redact">████</span>` : g.t}<small>${g.en}</small></h3>
     <p class="desc">${g.d}</p>
     <div class="specs">${g.specs.map(([a, b]) => `<div>${a}<b>${b}</b></div>`).join('')}</div>
-    ${g.link ? `<div><a class="btn solid" href="${g.link}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>지금 플레이</a></div>` : '<div></div>'}</div>`;
+    ${g.link ? `<div class="acts"><a class="btn solid" href="${g.link}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>지금 플레이</a>${g.shorts ? '<button class="btn ghost" type="button" data-shorts><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 9.5v5l4-2.5z" fill="currentColor" stroke="none"/></svg>공식 쇼츠 보기</button>' : ''}</div>` : '<div></div>'}</div>`;
   show.insertBefore(s, navEl);
   const b = document.createElement('button'); b.className = 'thumb'; b.type = 'button'; b.innerHTML = `<i></i><small>0${i + 1}</small><b>${g.t}</b>`; b.setAttribute('aria-label', `${g.t} 보기`);
   b.addEventListener('click', () => go(i)); thumbsEl.appendChild(b);
 });
 $('#cAll').textContent = String(GAMES.length).padStart(2, '0');
 const slides = $$('.slide'), thumbs = $$('.thumb');
-let cur = -1, timer = 0, paused = false, inView = false;
+let cur = -1, timer = 0, paused = false, inView = false, userPaused = false;
 const DUR = 7000;
+const saveData = !!(navigator.connection && navigator.connection.saveData);
+// gameplay video only plays while its slide is showing and the showcase is on screen
+function syncVideos(){
+  slides.forEach((s, j) => {
+    const v = s.querySelector('.vid'); if (!v) return;
+    const want = j === cur && inView && !reduce && !saveData && !document.hidden;
+    if (want){
+      if (v.paused) v.play().then(() => { v.classList.add('playing'); s.querySelector('.vtag')?.classList.add('live'); }).catch(() => {});
+    } else if (!v.paused){ v.pause(); }
+  });
+}
 function go(i){
   i = (i + GAMES.length) % GAMES.length; if (i === cur) return;
   slides.forEach((s, j) => { s.classList.remove('prev'); if (j === cur) { s.classList.remove('on'); s.classList.add('prev'); } });
   const s = slides[i]; s.classList.remove('on'); void s.offsetWidth; s.classList.add('on');
   thumbs.forEach((t, j) => { t.classList.toggle('on', j === i); t.querySelector('i').style.width = j < i ? '100%' : '0'; });
   cur = i; timer = 0; $('#cNow').textContent = String(i + 1).padStart(2, '0');
+  syncVideos();
 }
+document.addEventListener('visibilitychange', () => syncVideos());
 go(0);
 $('#prevBtn').addEventListener('click', () => go(cur - 1));
 $('#nextBtn').addEventListener('click', () => go(cur + 1));
@@ -926,11 +1036,21 @@ addEventListener('keydown', e => { if (!inView || e.target.closest('input,textar
 (function(){ let sx = null, sy = 0; show.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; });
   show.addEventListener('pointerup', e => { if (sx === null) return; const dx = e.clientX - sx, dy = e.clientY - sy; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1)); sx = null; });
   show.addEventListener('pointercancel', () => sx = null); })();
-new IntersectionObserver(es => { inView = es[0].isIntersecting; }, {threshold:.35}).observe(show);
+new IntersectionObserver(es => { inView = es[0].isIntersecting; syncVideos(); }, {threshold:.35}).observe(show);
+const PZ_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+const PZ_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>';
+const pz = $('#pauseBtn');
+if (reduce) pz.hidden = true;
+pz.innerHTML = PZ_PAUSE;
+pz.addEventListener('click', () => {
+  userPaused = !userPaused;
+  pz.innerHTML = userPaused ? PZ_PLAY : PZ_PAUSE;
+  pz.setAttribute('aria-label', userPaused ? '자동 넘기기 다시 켜기' : '자동 넘기기 멈추기');
+});
 let lastT = performance.now();
 (function tick(now){
   const dt = now - lastT; lastT = now;
-  if (inView && !paused && !reduce && !document.hidden){ timer += dt; const tb = thumbs[cur].querySelector('i'); tb.style.width = Math.min(100, timer / DUR * 100) + '%'; if (timer >= DUR) go(cur + 1); }
+  if (inView && !paused && !userPaused && !reduce && !document.hidden){ timer += dt; const tb = thumbs[cur].querySelector('i'); tb.style.width = Math.min(100, timer / DUR * 100) + '%'; if (timer >= DUR) go(cur + 1); }
   requestAnimationFrame(tick);
 })(lastT);
 // secret slide static
@@ -949,7 +1069,7 @@ const WORKS = [
   ['카트 러쉬','해변 트랙 3D 카트 레이싱','kart','2026.10'],
   ['얼렁뚱땅 용사단','B급 감성 전직 RPG','yongsa','2026.10'],
 ];
-$('#works').innerHTML = WORKS.map(([t, d, img, y], i) => `<article class="work rv${i % 3 ? ' d' + (i % 3) : ''}"><div class="img"><img src="img/${img}.jpg" alt="${t} 게임 화면" loading="lazy"></div><div class="glare"></div><div class="meta"><div><h3>${t}</h3><p>${d}</p></div><span class="yr">${y}</span></div></article>`).join('');
+$('#works').innerHTML = WORKS.map(([t, d, img, y], i) => `<article class="work rv${i % 3 ? ' d' + (i % 3) : ''}"><div class="img"><img src="img/${img}.jpg" alt="${t} 게임 화면" loading="lazy" decoding="async" width="880" height="550"></div><div class="glare"></div><div class="meta"><div><h3>${t}</h3><p>${d}</p></div><span class="yr">${y}</span></div></article>`).join('');
 $$('.work').forEach(w => {
   w.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse' || reduce) return; const r = w.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
     w.style.setProperty('--ry', ((x - .5) * 10).toFixed(2) + 'deg'); w.style.setProperty('--rx', ((.5 - y) * 10).toFixed(2) + 'deg'); w.style.setProperty('--gx', x * 100 + '%'); w.style.setProperty('--gy', y * 100 + '%'); });
@@ -1072,6 +1192,35 @@ $('.hero').addEventListener('click', e => {
   wishes++;
   say(wishes === 1 ? '✦ 별똥별이 떨어졌어요. 소원을 빌어 보세요' : `✦ 소원 ${wishes}개`);
 });
+
+/* official shorts modal */
+const vm = $('#vmodal'), vp = $('#vplayer'); let opener = null;
+function openShorts(btn){
+  opener = btn;
+  if (document.body.classList.contains('playing-ost')) $('#miniBtn').click();   // stop the site music first
+  vm.hidden = false; requestAnimationFrame(() => vm.classList.add('on'));
+  $('#vclose').focus();
+  vp.currentTime = 0; vp.play().catch(() => {});
+}
+function closeShorts(){
+  if (vm.hidden) return;
+  vp.pause(); vm.classList.remove('on');
+  setTimeout(() => { vm.hidden = true; }, 350);
+  if (opener) opener.focus();
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-shorts]'); if (b){ e.preventDefault(); openShorts(b); } });
+$('#vclose').addEventListener('click', closeShorts);
+vm.addEventListener('click', e => { if (e.target === vm) closeShorts(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') closeShorts(); if (e.key === 'Tab' && !vm.hidden){ e.preventDefault(); (document.activeElement === vp ? $('#vclose') : vp).focus(); } });
+
+/* share */
+async function share(){
+  const data = {title:'녹턴 게임즈 · Nocturne Games', text:'밤에 만들고, 새벽에 공개합니다. 1인 인디 게임 스튜디오 녹턴 게임즈', url:'https://9allproject9-creator.github.io/nocturne-games/'};
+  if (navigator.share){ try { await navigator.share(data); return; } catch(e){ if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(data.url); say('✦ 링크를 복사했어요. 친구에게 붙여 넣어 보세요'); }
+  catch(e){ say('주소: 9allproject9-creator.github.io/nocturne-games'); }
+}
+document.querySelectorAll('[data-share]').forEach(b => b.addEventListener('click', share));
 
 /* progress + to-top */
 const bar = $('#progress'), top = $('#totop');

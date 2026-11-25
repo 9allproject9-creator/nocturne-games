@@ -1,0 +1,16 @@
+{
+  "name": "녹턴 게임즈 · Nocturne Games",
+  "short_name": "녹턴",
+  "description": "밤에 만들고, 새벽에 공개합니다. 1인 인디 게임 스튜디오.",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#04060f",
+  "theme_color": "#04060f",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

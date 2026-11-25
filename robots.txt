@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://9allproject9-creator.github.io/nocturne-games/sitemap.xml
