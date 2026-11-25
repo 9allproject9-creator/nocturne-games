@@ -405,6 +405,12 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
   .numbers div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .post{grid-template-columns:1fr;gap:6px}
 }
+/* slow devices (detected while the page runs): drop every expensive effect, keep the look */
+html.lowfx{--glass:rgba(10,15,34,.9)}
+html.lowfx *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.lowfx .lantern{display:none}
+html.lowfx .nav.solid{background:rgba(4,6,15,.94)}
+html.lowfx .marquee .track{animation-duration:90s}
 /* phones & touch: blurring glass over an animated sky is expensive, so use solid glass instead */
 @media (max-width:680px), (pointer:coarse){
   :root{--glass:rgba(10,15,34,.9)}
@@ -695,7 +701,8 @@ footer{border-top:1px solid rgba(255,240,220,.16);background:rgba(10,6,12,.55);b
 
 <script id="frag" type="x-shader/x-fragment">
 precision highp float;
-uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro, uPhase; uniform vec2 uMouse; uniform vec4 uS0, uS1, uS2;
+uniform vec2 uRes; uniform float uTime, uScroll, uAudio, uIntro, uPhase, uMoonOn; uniform vec2 uMouse; uniform vec4 uS0, uS1, uS2;
+uniform sampler2D uMoon, uMoonH;
 float shoot(vec2 p, vec4 s, float t){
   float age = t - s.z; if (age < 0. || age > 1.5) return 0.;
   vec2 d = vec2(cos(s.w), sin(s.w));
@@ -706,9 +713,13 @@ float shoot(vec2 p, vec4 s, float t){
   return (exp(-dist * dist * 90000.) * h * h * 1.6 + exp(-dist * 220.) * h * .14 + exp(-length(p - head) * 90.) * .5) * env;
 }
 float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float hash1(float p){ p = fract(p * .1031); p *= p + 33.33; p *= p + p; return fract(p); }
 float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3. - 2. * f);
   return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y); }
+float noise1(float x){ float i = floor(x), f = fract(x); return mix(hash1(i), hash1(i + 1.), f * f * (3. - 2. * f)); }
 float fbm(vec2 p){ float v = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6); for (int i = 0; i < OCT; i++){ v += a * noise(p); p = m * p; a *= .5; } return v; }
+// mountains only need a 1D noise (height along x): far cheaper than the 2D version
+float fbm1(float x){ float v = 0., a = .5; for (int i = 0; i < 4; i++){ v += a * noise1(x); x = x * 2.07 + 13.7; a *= .5; } return v; }
 float stars(vec2 p, float sc, float thr, float t){
   vec2 g = p * sc, id = floor(g), f = fract(g) - .5;
   float h = hash(id); if (h < thr) return 0.;
@@ -717,7 +728,6 @@ float stars(vec2 p, float sc, float thr, float t){
   float tw = .55 + .45 * sin(t * (.8 + 3. * hash(id + 5.)) + h * 40.);
   return smoothstep(s, 0., d) * tw * (.4 + .6 * (h - thr) / (1. - thr));
 }
-float ridge(float x, float f, float s){ return fbm(vec2(x * f + s, s * 1.7)); }
 void main(){
   vec2 fc = gl_FragCoord.xy; float asp = uRes.x / uRes.y;
   vec2 p = (fc - .5 * uRes) / uRes.y;
@@ -725,111 +735,124 @@ void main(){
   float dawn = smoothstep(.74, 1., sc);
   vec2 par = uMouse * .02;
   float wide = step(1., asp);
+  float hz = -.13 - sc * .17;
   // sky
   vec3 top = mix(vec3(.006, .010, .030), vec3(.10, .11, .27), dawn);
   vec3 mid = mix(vec3(.020, .033, .090), vec3(.42, .28, .42), dawn);
   vec3 hor = mix(vec3(.055, .085, .19), vec3(1.0, .56, .33), dawn);
   vec3 col = mix(hor, mid, smoothstep(-.45, .02, p.y)); col = mix(col, top, smoothstep(.02, .5, p.y));
-  // milky way
+  // milky way (computed only near its band)
   vec2 dir = normalize(vec2(1., .5)); vec2 q0 = p - vec2(-.05, .12) + par * .3;
-  float bd = dot(q0, vec2(-dir.y, dir.x)), al = dot(q0, dir);
-  float mwn = fbm(vec2(al * 3.2, bd * 7.5) + 11.);
-  float band = exp(-bd * bd * 26.);
-  col += mix(vec3(.22, .2, .42), vec3(.62, .56, .82), mwn) * band * (.25 + smoothstep(.3, .85, mwn)) * .34 * (1. - dawn) * smoothstep(-.25, .1, p.y);
-  // stars
-  float st = stars(p + par * .25, 85., .935, t) + stars(p + par * .4, 42., .972, t) * 1.7 + stars(p + par * .15, 170., .9, t) * .55;
-  st *= (1. - dawn * .92) * smoothstep(-.28, .12, p.y) * (1. + uAudio * 1.6);
-  col += vec3(.9, .93, 1.) * st;
+  float bd = dot(q0, vec2(-dir.y, dir.x));
+  float band = exp(-bd * bd * 26.) * (1. - dawn) * smoothstep(-.25, .1, p.y);
+  if (band > .012){
+    float al = dot(q0, dir);
+    float mwn = fbm(vec2(al * 3.2, bd * 7.5) + 11.);
+    col += mix(vec3(.22, .2, .42), vec3(.62, .56, .82), mwn) * band * (.25 + smoothstep(.3, .85, mwn)) * .34;
+  }
+  // moon phase: uPhase 0 = new, .5 = full (waxing is lit from the right)
+  float mph = uPhase * 6.28318, illum = .5 - .5 * cos(mph);
+  // stars (fewer around a bright moon, none below the hills)
+  if (p.y > -.3){
+    float st = stars(p + par * .25, 85., .935, t) + stars(p + par * .4, 42., .972, t) * 1.7 + stars(p + par * .15, 170., .9, t) * .55;
+    st *= (1. - dawn * .92) * smoothstep(-.28, .12, p.y) * (1. + uAudio * 1.6);
+    col += vec3(.9, .93, 1.) * st;
+  }
   // shooting stars
   col += vec3(.92, .95, 1.) * (shoot(p, uS0, t) + shoot(p, uS1, t) + shoot(p, uS2, t)) * (1. - dawn * .8);
-  // moon
+  // ── the moon: NASA LRO photo map + height map, lit by tonight's real phase ──
   vec2 mc = mix(vec2(asp * .5 - .17, .3), vec2(asp * .5 - .34, .2), wide) + vec2(0., sc * .07 - dawn * .62) - par * .5;
-  float mr = mix(.075, .1, wide);
-  float dm = length(p - mc);
-  float ge = max(dm - mr, 0.);
-  // real moon phase: uPhase 0 = new moon, .5 = full moon (waxing lit from the right)
-  float mph = uPhase * 6.28318, illum = .5 - .5 * cos(mph);
-  col += vec3(.55, .62, .86) * (exp(-ge * 6.5) * .2 + exp(-ge * 28.) * .38) * (1. - dawn * .75) * (1. + uAudio * .5) * (.12 + .88 * illum);
-  vec2 q = (p - mc) / mr; float r = length(q);
-  if (r < 1.05){
-    vec3 n = vec3(q, sqrt(max(0., 1. - r * r)));
-    float maria = fbm(q * 1.7 + 4.), det = fbm(q * 7. + 20.);
-    float cr = 0.;
-    for (int i = 0; i < 7; i++){
-      float fi = float(i);
-      vec2 c = vec2(hash(vec2(fi, 1.)), hash(vec2(fi, 2.))) * 1.4 - .7;
-      float rr = .07 + .15 * hash(vec2(fi, 3.)), d = length(q - c) / rr;
-      cr += -smoothstep(1., .55, d) * .18 + smoothstep(.8, 1., d) * smoothstep(1.2, 1., d) * .22;
-    }
-    vec3 m = vec3(.97, .955, .9) * (.8 + .22 * det);
-    m *= 1. - smoothstep(.47, .66, maria) * .3;
-    m += cr * .3;
-    m *= .5 + .5 * pow(n.z, .55);
+  float mr = mix(.08, .108, wide);
+  float dm = length(p - mc), ge = max(dm - mr, 0.);
+  col += vec3(.55, .62, .86) * (exp(-ge * 5.5) * .16 + exp(-ge * 24.) * .34) * (1. - dawn * .75) * (1. + uAudio * .5) * (.08 + .92 * illum);
+  vec2 q = (p - mc) / mr; float r2 = dot(q, q);
+  if (r2 < 1.1){
+    float r = sqrt(r2);
+    vec3 n = vec3(q, sqrt(max(0., 1. - r2)));
+    float lon = atan(n.x, n.z), lat = asin(clamp(n.y, -1., 1.));
+    vec2 uv = vec2(.5 + lon / 6.28318, .5 - lat / 3.14159);
+    vec3 alb = texture2D(uMoon, uv).rgb;
+    alb = mix(vec3(.72), pow(alb, vec3(1.18)) * 1.12, uMoonOn);
+    vec2 e = vec2(1. / 1024., 1. / 512.);
+    float hx = texture2D(uMoonH, uv + vec2(e.x, 0.)).r - texture2D(uMoonH, uv - vec2(e.x, 0.)).r;
+    float hy = texture2D(uMoonH, uv - vec2(0., e.y)).r - texture2D(uMoonH, uv + vec2(0., e.y)).r;
+    vec3 T = vec3(cos(lon), 0., -sin(lon));
+    vec3 B = vec3(-sin(lat) * sin(lon), cos(lat), -sin(lat) * cos(lon));
+    vec3 nn = normalize(n - (hx * T + hy * B) * 3.2 * uMoonOn);
     vec3 Lm = vec3(sin(mph), 0., -cos(mph));
-    float lit = smoothstep(-.12, .08, dot(n, Lm));
-    m = m * lit + m * vec3(.5, .62, .95) * .075 * (1. - lit);
+    float d0 = dot(n, Lm), dl = max(dot(nn, Lm), 0.);
+    // Lommel-Seeliger: a full moon stays bright to the edge, and craters show near the terminator
+    float I = clamp(2. * dl / (dl + n.z + .05), 0., 1.15) * smoothstep(-.1, .03, d0);
+    vec3 m = alb * I * 1.22 + alb * vec3(.55, .65, .95) * .045 * (1. - smoothstep(0., .25, I));
     m = mix(m, m * vec3(1., .78, .58), dawn);
-    float aa = 2.5 / (uRes.y * mr);
+    float aa = 2. / (uRes.y * mr);
     col = mix(col, m, smoothstep(1., 1. - aa, r) * (1. - dawn * .35));
   }
   // dawn sun
-  float hz = -.13 - sc * .17;
-  vec2 sp = vec2(mix(0., -.25 * asp, 0.), hz + .02 + dawn * .12);
+  vec2 sp = vec2(0., hz + .02 + dawn * .12);
   float sd = length(p - sp);
   col += vec3(1., .62, .3) * exp(-sd * 3.2) * .55 * dawn + vec3(1., .85, .6) * smoothstep(.07, .055, sd) * dawn;
-  // clouds
-  float prox = exp(-dm * 3.4);
-  vec2 cp = vec2(p.x * 1.1 + t * .011, p.y * 2.6) + par * .7;
-  float cn = fbm(cp * 2.1 + vec2(0., 3.));
-  float cmask = smoothstep(-.18, .06, p.y) * smoothstep(.5, .12, p.y);
-  float dens = smoothstep(.44, .74, cn) * cmask;
-  float rim = smoothstep(.44, .52, cn) * (1. - smoothstep(.52, .68, cn));
+  // clouds (computed only inside their bands)
+  float prox = exp(-dm * 3.4) * (.15 + .85 * illum);
   vec3 cc = mix(vec3(.03, .04, .085), vec3(.13, .15, .26), smoothstep(-.1, .4, p.y));
   cc = mix(cc, vec3(.98, .6, .45), dawn * .65);
-  cc += vec3(.75, .82, 1.) * rim * prox * 1.7 * (1. - dawn) + vec3(.3, .35, .55) * prox * .22;
-  col = mix(col, cc, dens * .93);
-  float cn2 = fbm(vec2(p.x * .9 - t * .017, p.y * 5.) * 2.6 + 9.);
-  float d2 = smoothstep(.55, .8, cn2) * smoothstep(-.32, -.05, p.y) * smoothstep(.22, -.02, p.y);
-  col = mix(col, cc * .85 + vec3(.3, .35, .55) * prox * .35, d2 * .55);
+  float cmask = smoothstep(-.18, .06, p.y) * smoothstep(.5, .12, p.y);
+  if (cmask > .002){
+    vec2 cp = vec2(p.x * 1.1 + t * .011, p.y * 2.6) + par * .7;
+    float cn = fbm(cp * 2.1 + vec2(0., 3.));
+    float dens = smoothstep(.44, .74, cn) * cmask;
+    float rim = smoothstep(.44, .52, cn) * (1. - smoothstep(.52, .68, cn));
+    vec3 c3 = cc + vec3(.75, .82, 1.) * rim * prox * 1.7 * (1. - dawn) + vec3(.3, .35, .55) * prox * .22;
+    col = mix(col, c3, dens * .93);
+  }
+  float m2 = smoothstep(-.32, -.05, p.y) * smoothstep(.22, -.02, p.y);
+  if (m2 > .002){
+    float cn2 = fbm(vec2(p.x * .9 - t * .017, p.y * 5.) * 2.6 + 9.);
+    col = mix(col, cc * .85 + vec3(.3, .35, .55) * prox * .35, smoothstep(.55, .8, cn2) * m2 * .55);
+  }
   // lantern air
   vec2 mp = uMouse;
   col += vec3(1., .66, .3) * exp(-length(p - mp) * 6.) * .03;
-  // mountains (far → near)
-  float aa2 = 1.6 / uRes.y;
-  float x0 = p.x + par.x * .4, x1 = p.x + par.x * .9, x2 = p.x + par.x * 1.6;
-  float h0 = hz + .1 + (ridge(x0, 1.1, 3.) - .5) * .5 + (1. - abs(noise(vec2(x0 * 3.2, 5.)) * 2. - 1.)) * .05;
-  float h1 = hz + .02 + (ridge(x1, 1.5, 7.) - .5) * .42 + (1. - abs(noise(vec2(x1 * 4.5, 9.)) * 2. - 1.)) * .035;
-  float h2 = hz - .08 + (ridge(x2, 2.1, 13.) - .5) * .36;
-  vec3 haze = mix(hor, vec3(.03, .05, .12), .55);
-  col = mix(col, mix(haze, vec3(.6, .35, .35), dawn * .4), smoothstep(h0 + aa2, h0 - aa2, p.y) * .9);
-  vec3 c1 = mix(vec3(.018, .028, .07), vec3(.22, .13, .18), dawn * .7);
-  float in1 = smoothstep(h1 + aa2, h1 - aa2, p.y);
-  col = mix(col, c1, in1);
-  vec3 c2 = mix(vec3(.006, .009, .022), vec3(.08, .05, .07), dawn * .7);
-  c2 += vec3(1., .62, .3) * exp(-length(p - mp) * 5.) * .07;
-  float in2 = smoothstep(h2 + aa2, h2 - aa2, p.y);
-  col = mix(col, c2, in2);
-  // village lights on mid & near ridge
-  for (int k = 0; k < 2; k++){
-    float hk = k == 0 ? h1 : h2; float sck = k == 0 ? 70. : 46.;
-    float xx = (k == 0 ? x1 : x2);
-    vec2 g = vec2(xx * sck, (p.y - hk) * sck);
-    vec2 id = floor(g), f = fract(g) - .5;
-    float hh = hash(id + float(k) * 17.);
-    float below = step(p.y, hk - .012) * step(hk - (k == 0 ? .09 : .16), p.y);
-    float on = step(.9, hh) * below * (k == 0 ? (1. - in2) : 1.);
-    float fl = .7 + .3 * sin(t * (2. + 3. * hh) + hh * 50.);
-    col += vec3(1., .72, .38) * smoothstep(.16, 0., length(f)) * on * fl * (1. - dawn * .8) * (k == 0 ? .7 : 1.);
-  }
-  // fireflies
-  for (int i = 0; i < NFF; i++){
-    float fi = float(i);
-    vec2 b = vec2((hash(vec2(fi, 1.3)) - .5) * asp * 1.05, hz - .02 - .2 * hash(vec2(fi, 2.7)));
-    float sp2 = .35 + hash(vec2(fi, 4.1)) * .7, ph = hash(vec2(fi, 5.9)) * 6.28;
-    b += vec2(sin(t * .31 * sp2 + ph) * .07, sin(t * .43 * sp2 + ph * 1.7) * .045) + par * 2.;
-    float d = length(p - b);
-    float pulse = pow(.5 + .5 * sin(t * (1.1 + sp2) + ph * 3.), 3.);
-    col += vec3(1., .78, .4) * (exp(-d * d * 14000.) * 1.2 + exp(-d * 60.) * .06) * pulse * (1. + uAudio * 2.) * (1. - dawn * .6);
+  // mountains, village lights and fireflies (only near the bottom of the screen)
+  if (p.y < hz + .44){
+    float aa2 = 1.6 / uRes.y;
+    float x0 = p.x + par.x * .4, x1 = p.x + par.x * .9, x2 = p.x + par.x * 1.6;
+    float h0 = hz + .1 + (fbm1(x0 * 1.1 + 3.) - .5) * .5 + (1. - abs(noise1(x0 * 3.2 + 5.) * 2. - 1.)) * .05;
+    float h1 = hz + .02 + (fbm1(x1 * 1.5 + 7.) - .5) * .42 + (1. - abs(noise1(x1 * 4.5 + 9.) * 2. - 1.)) * .035;
+    float h2 = hz - .08 + (fbm1(x2 * 2.1 + 13.) - .5) * .36;
+    vec3 haze = mix(hor, vec3(.03, .05, .12), .55);
+    col = mix(col, mix(haze, vec3(.6, .35, .35), dawn * .4), smoothstep(h0 + aa2, h0 - aa2, p.y) * .9);
+    vec3 c1 = mix(vec3(.018, .028, .07), vec3(.22, .13, .18), dawn * .7);
+    float in1 = smoothstep(h1 + aa2, h1 - aa2, p.y);
+    col = mix(col, c1, in1);
+    vec3 c2 = mix(vec3(.006, .009, .022), vec3(.08, .05, .07), dawn * .7);
+    c2 += vec3(1., .62, .3) * exp(-length(p - mp) * 5.) * .07;
+    float in2 = smoothstep(h2 + aa2, h2 - aa2, p.y);
+    col = mix(col, c2, in2);
+    for (int k = 0; k < 2; k++){
+      float hk = k == 0 ? h1 : h2;
+      if (p.y < hk - .012){
+        float sck = k == 0 ? 70. : 46.;
+        float xx = (k == 0 ? x1 : x2);
+        vec2 g = vec2(xx * sck, (p.y - hk) * sck);
+        vec2 id = floor(g), f = fract(g) - .5;
+        float hh = hash(id + float(k) * 17.);
+        float on = step(.9, hh) * step(hk - (k == 0 ? .09 : .16), p.y) * (k == 0 ? (1. - in2) : 1.);
+        float fl = .7 + .3 * sin(t * (2. + 3. * hh) + hh * 50.);
+        col += vec3(1., .72, .38) * smoothstep(.16, 0., length(f)) * on * fl * (1. - dawn * .8) * (k == 0 ? .7 : 1.);
+      }
+    }
+    if (p.y < hz + .12){
+      for (int i = 0; i < NFF; i++){
+        float fi = float(i);
+        vec2 b = vec2((hash(vec2(fi, 1.3)) - .5) * asp * 1.05, hz - .02 - .2 * hash(vec2(fi, 2.7)));
+        float sp2 = .35 + hash(vec2(fi, 4.1)) * .7, ph = hash(vec2(fi, 5.9)) * 6.28;
+        b += vec2(sin(t * .31 * sp2 + ph) * .07, sin(t * .43 * sp2 + ph * 1.7) * .045) + par * 2.;
+        float d = length(p - b);
+        float pulse = pow(.5 + .5 * sin(t * (1.1 + sp2) + ph * 3.), 3.);
+        col += vec3(1., .78, .4) * (exp(-d * d * 14000.) * 1.2 + exp(-d * 60.) * .06) * pulse * (1. + uAudio * 2.) * (1. - dawn * .6);
+      }
+    }
   }
   // grain & vignette
   col += (hash(fc + fract(t) * 91.) - .5) * .02;
@@ -863,7 +886,7 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
   const cv = $('#sky');
   const gl = cv.getContext('webgl', {antialias:false, alpha:false, powerPreference:'high-performance'}) || cv.getContext('experimental-webgl');
   if (!gl){ root.classList.add('nosky'); return; }
-  const fragSrc = `#define OCT ${mobile ? 4 : 5}\n#define NFF ${mobile ? 12 : 22}\n` + $('#frag').textContent;
+  const fragSrc = `#define OCT ${mobile ? 3 : 4}\n#define NFF ${mobile ? 10 : 18}\n` + $('#frag').textContent;
   const vs = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }';
   function sh(type, src){ const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ console.error(gl.getShaderInfoLog(s)); return null; } return s; }
   const v = sh(gl.VERTEX_SHADER, vs), f = sh(gl.FRAGMENT_SHADER, fragSrc);
@@ -875,34 +898,93 @@ let scrollP = 0, mouse = {x:0, y:0, tx:0, ty:0};
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   const loc = gl.getAttribLocation(pr, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = n => gl.getUniformLocation(pr, n);
-  const uRes = U('uRes'), uTime = U('uTime'), uScroll = U('uScroll'), uAudio = U('uAudio'), uIntro = U('uIntro'), uMouse = U('uMouse'), uPhase = U('uPhase');
+  const uRes = U('uRes'), uTime = U('uTime'), uScroll = U('uScroll'), uAudio = U('uAudio'), uIntro = U('uIntro'), uMouse = U('uMouse'), uPhase = U('uPhase'), uMoonOn = U('uMoonOn');
   let phaseNow = moonPhase(new Date()).frac; setInterval(() => { phaseNow = moonPhase(new Date()).frac; }, 60000);
-  const lowFps = mobile;   // phones: draw the sky at ~30fps to save battery
+  // NASA LRO moon photo map (unit 0) and height map (unit 1); a plain grey moon shows until they arrive
+  let texReady = 0, moonOn = 0;
+  function loadTex(unit, url){
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([184, 184, 184, 255]));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    const img = new Image();
+    img.onload = () => {
+      gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      texReady++;
+    };
+    img.src = url;
+  }
+  loadTex(0, 'img/moon.jpg'); loadTex(1, 'img/moon-h.jpg');
+  gl.uniform1i(U('uMoon'), 0); gl.uniform1i(U('uMoonH'), 1);
+  let fpsCap = mobile ? 30 : 0;   // phones draw the sky at ~30fps to save battery; slow PCs get capped too
   const uS = [U('uS0'), U('uS1'), U('uS2')], shots = [[0, 0, -9, 0], [0, 0, -9, 0], [0, 0, -9, 0]]; let shotK = 0;
   // shooting star: x, y in sky units (height = 1), heading down-left
   window.nocturneShoot = (x, y, ang) => { shots[shotK] = [x, y, (performance.now() - t0) / 1000, ang ?? Math.PI * (1.08 + Math.random() * .14)]; shotK = (shotK + 1) % 3; };
   if (!reduce) (function auto(){ setTimeout(() => { if (!document.hidden){ const asp = innerWidth / innerHeight; window.nocturneShoot((Math.random() - .3) * asp * .5, .18 + Math.random() * .3); } auto(); }, 6000 + Math.random() * 9000); })();
-  let scale = mobile ? Math.min(devicePixelRatio || 1, 1.5) * .55 : Math.min(devicePixelRatio || 1, 1.5) * .8;
-  function resize(){ cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height); }
-  resize(); addEventListener('resize', resize);
-  let t0 = performance.now(), last = t0, intro = 0, frames = 0, acc = 0, sScroll = 0;
+  // resolution: a pixel budget first (the sky is soft, so it can be drawn smaller than the screen)
+  const MIN_SCALE = .32;
+  function budgetScale(){
+    const dpr = Math.min(devicePixelRatio || 1, 2), budget = mobile ? .3e6 : 1.25e6;
+    return Math.max(MIN_SCALE, Math.min(dpr * (mobile ? .62 : .85), Math.sqrt(budget / Math.max(1, innerWidth * innerHeight))));
+  }
+  let maxScale = budgetScale(), scale = maxScale;
+  function resize(){ maxScale = Math.max(budgetScale() * gpuFactor, MIN_SCALE); scale = Math.min(scale, maxScale); if (scale < maxScale && !slowNow) scale = maxScale;
+    cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height); }
+  let gpuFactor = 1, slowNow = false;
+  addEventListener('resize', resize);
+  let t0 = performance.now(), last = t0, intro = 0, sScroll = 0;
+  // one-time GPU check: time a few real frames (readPixels waits for the GPU), then size the sky to fit this device
+  function draw(time){
+    gl.uniform2f(uRes, cv.width, cv.height); gl.uniform1f(uTime, time); gl.uniform1f(uScroll, sScroll); gl.uniform1f(uAudio, audio.level);
+    gl.uniform1f(uIntro, intro * intro * (3 - 2 * intro)); gl.uniform2f(uMouse, mouse.x, mouse.y); gl.uniform1f(uPhase, phaseNow);
+    gl.uniform1f(uMoonOn, moonOn);
+    for (let k = 0; k < 3; k++) gl.uniform4f(uS[k], shots[k][0], shots[k][1], shots[k][2], shots[k][3]);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+  (function calibrate(){
+    resize();
+    const px = new Uint8Array(4), timeIt = n => { const s = performance.now(); for (let i = 0; i < n; i++){ draw(i * .05); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); } return (performance.now() - s) / n; };
+    try {
+      timeIt(1);
+      const full = timeIt(3);
+      gl.viewport(0, 0, 8, 8); const tiny = timeIt(3); gl.viewport(0, 0, cv.width, cv.height);
+      const gpu = Math.max(0, full - tiny), budget = mobile ? 9 : 6;   // ms the sky may take per frame
+      if (gpu > budget){
+        gpuFactor = Math.max(MIN_SCALE / maxScale, Math.sqrt(budget / gpu));
+        scale = Math.max(MIN_SCALE, maxScale * gpuFactor); maxScale = scale;
+        cv.width = Math.max(2, Math.round(innerWidth * scale)); cv.height = Math.max(2, Math.round(innerHeight * scale)); gl.viewport(0, 0, cv.width, cv.height);
+        if (gpu * (scale * scale) / (budgetScale() ** 2) > budget * 1.6 || gpu > budget * 6){ fpsCap = 30; root.classList.add('lowfx'); }
+      }
+      window.__skyCheck = {gpuMs: +gpu.toFixed(2), scale: +scale.toFixed(2), fpsCap, lowfx: root.classList.contains('lowfx')};
+    } catch(e){}
+  })();
+  if ((navigator.deviceMemory && navigator.deviceMemory <= 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)) root.classList.add('lowfx');
+  // safety net: if the page keeps running below ~20fps (for example a phone getting hot), draw the sky smaller
+  let ema = 0, slowCount = 0, lastEval = 0;
+  function watch(now, ms){
+    if (ms > 250) return;                          // came back from another tab
+    ema = ema ? ema * .9 + ms * .1 : ms;
+    if (now - lastEval < 1500 || now - t0 < 4000) return;
+    lastEval = now;
+    if (ema > 52){ if (++slowCount >= 2 && scale > MIN_SCALE + .01){ slowNow = true; scale = Math.max(MIN_SCALE, scale * .85); cv.width = Math.round(innerWidth * scale); cv.height = Math.round(innerHeight * scale); gl.viewport(0, 0, cv.width, cv.height); fpsCap = 30; slowCount = 0; } }
+    else slowCount = 0;
+  }
   function frame(now){
-    if (lowFps && now - last < 30){ requestAnimationFrame(frame); return; }
-    const dt = Math.min(.1, (now - last) / 1000); last = now;
-    // adaptive quality
-    if (frames < 90){ frames++; if (frames > 20) acc += dt; if (frames === 90 && acc / 70 > 1 / 40 && scale > .35){ scale *= .72; resize(); } }
+    if (fpsCap && now - last < 1000 / fpsCap - 3){ requestAnimationFrame(frame); return; }
+    const ms = now - last, dt = Math.min(.1, ms / 1000); last = now;
+    watch(now, ms);
+    if (texReady >= 2 && moonOn < 1) moonOn = Math.min(1, moonOn + dt * 1.5);
     intro = Math.min(1, intro + dt * (introDone ? .7 : 0));
     mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 3); mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 3);
     sScroll += (scrollP - sScroll) * Math.min(1, dt * 4);
-    gl.uniform2f(uRes, cv.width, cv.height);
-    gl.uniform1f(uTime, reduce ? 20 : (now - t0) / 1000);
-    gl.uniform1f(uScroll, sScroll);
-    gl.uniform1f(uAudio, audio.level);
-    gl.uniform1f(uIntro, intro * intro * (3 - 2 * intro));
-    gl.uniform2f(uMouse, mouse.x, mouse.y);
-    gl.uniform1f(uPhase, phaseNow);
-    for (let k = 0; k < 3; k++) gl.uniform4f(uS[k], shots[k][0], shots[k][1], shots[k][2], shots[k][3]);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    draw(reduce ? 20 : (now - t0) / 1000);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -944,12 +1026,14 @@ function moonIcon(frac){
   const r = 8, c = Math.cos(frac * 2 * Math.PI), rx = Math.abs(c) * r, waxing = frac < .5;
   const outer = waxing ? `M10 2 A${r} ${r} 0 0 1 10 18` : `M10 2 A${r} ${r} 0 0 0 10 18`;
   const sweep = waxing ? (c > 0 ? 0 : 1) : (c > 0 ? 1 : 0);
-  return `<circle cx="10" cy="10" r="${r}" fill="rgba(236,230,214,.14)" stroke="rgba(236,230,214,.35)" stroke-width=".6"/><path d="${outer} A${rx.toFixed(2)} ${r} 0 0 ${sweep} 10 2 Z" fill="#ece6d6"/>`;
+  return `<circle cx="10" cy="10" r="${r}" fill="rgba(236,230,214,.12)"/><path d="${outer} A${rx.toFixed(2)} ${r} 0 0 ${sweep} 10 2 Z" fill="#ece6d6"/>`;
 }
 (function moonLine(){
   const m = moonPhase(new Date());
   $('#moonIcon').innerHTML = moonIcon(m.frac);
-  $('#moonInfo').textContent = `오늘 밤의 달 · ${m.name} · 밝기 ${Math.round(m.illum * 100)}%`;
+  const toFull = ((14.765 - m.age) % 29.530588853 + 29.530588853) % 29.530588853;
+  const next = (m.age > 13.8 && m.age < 15.8) ? '오늘은 보름달이에요' : `다음 보름달까지 ${Math.max(1, Math.round(toFull))}일`;
+  $('#moonInfo').textContent = `오늘 밤의 달 · ${m.name} · 밝기 ${Math.round(m.illum * 100)}% · ${next}`;
 })();
 
 /* studio clock */
@@ -1145,10 +1229,14 @@ $('#prog').addEventListener('click', e => { const r = e.currentTarget.getBoundin
 const viz = $('#viz'), vx = viz.getContext('2d');
 function vizSize(){ const r = viz.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); viz.width = r.width * d; viz.height = r.height * d; }
 vizSize(); addEventListener('resize', vizSize);
+let deckSeen = false;
+new IntersectionObserver(es => { deckSeen = es[0].isIntersecting; }).observe($('#deck'));
 (function loop(){
   let lvl = 0;
-  if (an && !au.paused){ an.getByteFrequencyData(data); let s = 0; for (let i = 2; i < 40; i++) s += data[i]; lvl = s / (38 * 255); }
+  const live = an && !au.paused;
+  if (live){ an.getByteFrequencyData(data); let s = 0; for (let i = 2; i < 40; i++) s += data[i]; lvl = s / (38 * 255); }
   audio.level += (lvl * 1.4 - audio.level) * .15;
+  if (!deckSeen){ requestAnimationFrame(loop); return; }   // nothing to draw while the record is off screen
   const W = viz.width, H = viz.height; vx.clearRect(0, 0, W, H);
   const cx = W / 2, cy = H / 2, r0 = W * .36, N = 96;
   for (let i = 0; i < N; i++){
@@ -1264,7 +1352,13 @@ function build(){
     if (narrow) return [s[3] ? 300 : 200 + j * 230 + Math.sin(i * .55) * 40, 70 + k * (H - 150) + (rnd(i + 3) - .5) * 30];
     return [70 + k * (W - 140) + (rnd(i + 3) - .5) * 26, s[3] ? 110 : 265 + j * 270 + Math.sin(i * .55) * 55];
   });
-  const path = 'M' + pts.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L');
+  // smooth curve through the stars (Catmull-Rom → cubic Bézier)
+  const P = i => pts[Math.max(0, Math.min(n - 1, i))], f1 = v => v.toFixed(1);
+  let path = `M${f1(pts[0][0])} ${f1(pts[0][1])}`;
+  for (let i = 0; i < n - 1; i++){
+    const a = P(i - 1), b = P(i), c = P(i + 1), d = P(i + 2);
+    path += ` C${f1(b[0] + (c[0] - a[0]) / 6)} ${f1(b[1] + (c[1] - a[1]) / 6)} ${f1(c[0] - (d[0] - b[0]) / 6)} ${f1(c[1] - (d[1] - b[1]) / 6)} ${f1(c[0])} ${f1(c[1])}`;
+  }
   const bg = Array.from({length:narrow ? 70 : 120}, (_, i) => `<circle cx="${(rnd(i + 50) * W).toFixed(1)}" cy="${(rnd(i + 900) * H).toFixed(1)}" r="${(rnd(i + 300) * 1.2 + .3).toFixed(2)}" fill="rgba(236,230,214,${(rnd(i + 700) * .5 + .1).toFixed(2)})"/>`).join('');
   // month dividers: Sep | Oct between 0-1, Oct | Nov between 7-8
   const mid = (a, b) => [(pts[a][0] + pts[b][0]) / 2, (pts[a][1] + pts[b][1]) / 2];
